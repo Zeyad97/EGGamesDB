@@ -1,26 +1,271 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
+/*
+ * EGGameDB storefront tokens.
+ * A restrained, desktop-store palette: solid navy/slate surfaces, a blue
+ * selection colour, green for free/positive states, and gold reserved for
+ * Egyptian provenance only.
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-eg-gold: var(--eg-gold);
+  --color-eg-blue: var(--eg-blue);
+  --color-eg-green: var(--eg-green);
+  --color-eg-nav: var(--eg-nav);
+  --color-eg-header: var(--eg-header);
+  --color-eg-dark: var(--eg-dark);
+  --color-eg-darker: var(--eg-darker);
+  --color-eg-card: var(--eg-card);
+  --color-eg-surface: var(--eg-surface);
+  --color-eg-border: var(--eg-border);
+  --color-eg-border-strong: var(--eg-border-strong);
+  --color-eg-muted: var(--eg-muted);
+  --color-eg-text: var(--eg-text);
+  --color-eg-text-sub: var(--eg-text-sub);
+  --color-eg-heading: var(--eg-heading);
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-pixel: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root,
+.dark {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --eg-header: #10151a;
+  --eg-nav: #1d3a56;
+  --eg-dark: #16202b;
+  --eg-darker: #111820;
+  --eg-card: #18242f;
+  --eg-surface: #1f2e3c;
+
+  /* Lines */
+  --eg-border: rgba(255, 255, 255, 0.09);
+  --eg-border-strong: rgba(255, 255, 255, 0.16);
+
+  /* Text */
+  --eg-heading: #ffffff;
+  --eg-text: #c7d5e0;
+  --eg-text-sub: #a3b3c2;
+  --eg-muted: #7d8b99;
+
+  /* Accents */
+  --eg-blue: #66c0f4;
+  --eg-blue-strong: #3d9fd8;
+  --eg-green: #a1cf4a;
+  --eg-green-strong: #74a11f;
+  --eg-gold: #c9a55c;
+  --eg-red: #c9454f;
+
+  /* Compatibility aliases kept for untouched dashboards and forms */
+  --eg-req-bg: #131b23;
+  --eg-req-li-sep: rgba(255, 255, 255, 0.07);
+  --eg-scrollbar: #10151a;
+  --eg-cyan: var(--eg-blue);
+  --eg-cyan-strong: var(--eg-blue-strong);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background: var(--eg-dark);
+  color: var(--eg-text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+[dir="rtl"] body {
+  font-family: "Cairo", "Inter", system-ui, sans-serif;
+}
+
+::selection {
+  background: rgba(102, 192, 244, 0.3);
+  color: #fff;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--eg-scrollbar);
+}
+::-webkit-scrollbar-thumb {
+  background: #2c3e50;
+  border-radius: 5px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3d556c;
+}
+
+/* ---------------------------------------------------------------------------
+   Storefront layout helpers
+   --------------------------------------------------------------------------- */
+
+.store-shell {
+  background: var(--eg-dark);
+}
+
+/* Compact centred store width, used by every public surface. */
+.store-container {
+  width: 100%;
+  max-width: 1140px;
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+@media (min-width: 640px) {
+  .store-container {
+    padding-inline: 1.5rem;
+  }
+}
+
+.store-section {
+  border-top: 1px solid var(--eg-border);
+}
+
+/* Small, quiet section title — no display sizes, no uppercase tracking. */
+.store-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--eg-heading);
+}
+
+/* Scrollable shelf rows stay practical: no visible scrollbar chrome. */
+.store-row {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  padding-bottom: 0.25rem;
+}
+.store-row > * {
+  scroll-snap-align: start;
+}
+.store-row::-webkit-scrollbar {
+  height: 6px;
+}
+
+/* A quiet geometric line (footer only) — interlaced diagonals, no iconography. */
+.eg-geometric-rule {
+  height: 5px;
+  opacity: 0.5;
+  background-image:
+    repeating-linear-gradient(45deg, rgba(201, 165, 92, 0.45) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 7px);
+}
+
+/* ---------------------------------------------------------------------------
+   Long-form content (game descriptions, legal pages)
+   --------------------------------------------------------------------------- */
+
+.prose-game {
+  color: var(--eg-text-sub);
+  font-size: 0.875rem;
+  line-height: 1.75;
+}
+.prose-game h1,
+.prose-game h2,
+.prose-game h3 {
+  color: var(--eg-heading);
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 1.5em 0 0.5em;
+}
+.prose-game h1:first-child,
+.prose-game h2:first-child,
+.prose-game h3:first-child {
+  margin-top: 0;
+}
+.prose-game p {
+  margin: 0.75em 0;
+}
+.prose-game strong,
+.prose-game b {
+  color: var(--eg-text);
+}
+.prose-game ul,
+.prose-game ol {
+  list-style: disc;
+  padding-inline-start: 1.25rem;
+  margin: 0.75em 0;
+}
+.prose-game a {
+  color: var(--eg-blue);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-game img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.75em 0;
+  border: 1px solid var(--eg-border);
+}
+
+.req-block {
+  background: var(--eg-req-bg);
+  border: 1px solid var(--eg-border);
+  padding: 0.875rem 1rem;
+}
+.req-block ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.req-block li {
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--eg-req-li-sep);
+  font-size: 0.8125rem;
+}
+.req-block li:last-child {
+  border-bottom: 0;
+}
+.req-block b {
+  color: var(--eg-heading);
+}
+
+/* ---------------------------------------------------------------------------
+   Interaction
+   --------------------------------------------------------------------------- */
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--eg-blue);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }
