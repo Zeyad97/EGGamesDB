@@ -60,8 +60,9 @@ export default async function LandingPage({ params }: LandingPageProps) {
     if (error) throw error;
     games = (data ?? []) as Game[];
     if (games.length === 0) usingDemo = true;
-  } catch {
+  } catch (e) {
     usingDemo = true;
+    (globalThis as unknown as { __LAST_DB_ERROR?: string }).__LAST_DB_ERROR = String(e).slice(0, 200);
   }
 
   if (usingDemo) {
@@ -71,5 +72,12 @@ export default async function LandingPage({ params }: LandingPageProps) {
   const latest = games[0] ? serializeGame(games[0], locale) : null;
   const previews = games.slice(1, 4).map((game) => serializeGame(game, locale));
 
-  return <LandingExperience locale={locale} latest={latest} previews={previews} usingDemo={usingDemo} />;
+  return (
+    <>
+      {(globalThis as unknown as { __LAST_DB_ERROR?: string }).__LAST_DB_ERROR && (
+        <div data-debug-error={(globalThis as unknown as { __LAST_DB_ERROR?: string }).__LAST_DB_ERROR} style={{ display: "none" }} />
+      )}
+      <LandingExperience locale={locale} latest={latest} previews={previews} usingDemo={usingDemo} />
+    </>
+  );
 }
