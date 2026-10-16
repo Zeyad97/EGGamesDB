@@ -10,6 +10,8 @@ import { EgyptFlag } from "@/components/layout/Brand";
 import { formatDate, formatNumber } from "@/lib/utils";
 import type { Game, Profile } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 interface DeveloperPageProps {
   params: Promise<{ locale: string; username: string }>;
 }

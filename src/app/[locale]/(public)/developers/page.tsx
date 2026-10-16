@@ -5,6 +5,8 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import type { Profile } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 interface DevelopersPageProps {
   params: Promise<{ locale: string }>;
 }

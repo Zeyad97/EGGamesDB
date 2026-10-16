@@ -8,6 +8,8 @@ import { DemoNotice } from "@/components/games/DemoNotice";
 import { DEMO_GAMES, queryDemoGames } from "@/lib/demo-games";
 import type { Game, GameFilters } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 interface GamesPageProps {
   params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string>>;

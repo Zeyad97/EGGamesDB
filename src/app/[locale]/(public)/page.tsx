@@ -5,6 +5,8 @@ import { DEMO_GAMES } from "@/lib/demo-games";
 import { LandingExperience, type LandingGame } from "@/components/home/LandingExperience";
 import type { Game } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 interface LandingPageProps {
   params: Promise<{ locale: string }>;
 }

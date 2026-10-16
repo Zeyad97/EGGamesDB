@@ -4,6 +4,8 @@ import { GameDetailClient } from "@/components/games/GameDetailClient";
 import { DEMO_GAMES, findDemoGame } from "@/lib/demo-games";
 import type { Game, GameReview } from "@/types";
 
+export const dynamic = "force-dynamic";
+
 interface GamePageProps {
   params: Promise<{ locale: string; slug: string }>;
 }
