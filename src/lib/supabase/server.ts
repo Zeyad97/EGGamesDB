@@ -27,9 +27,9 @@ export async function createClient() {
   );
 }
 
-// Bounded timeout (ms) for anonymous public catalog reads. An unreachable
-// Supabase backend must fail fast instead of blocking navigation for seconds.
-const PUBLIC_FETCH_TIMEOUT_MS = 1500;
+// Bounded timeout (ms) for anonymous public catalog reads. Must allow for
+// cold-start + cross-region latency (Vercel US -> Supabase EU can take 2-4s).
+const PUBLIC_FETCH_TIMEOUT_MS = 10000;
 
 // Thin wrapper around the ambient (Next-patched) global fetch that aborts
 // hung requests after PUBLIC_FETCH_TIMEOUT_MS. An upstream abort signal is
