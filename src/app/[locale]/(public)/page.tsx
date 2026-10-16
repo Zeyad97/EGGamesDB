@@ -1,105 +1,73 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { createClient } from "@/lib/supabase/server";
-import { HeroSection } from "@/components/home/HeroSection";
-import { FeaturedGames } from "@/components/home/FeaturedGames";
-import { LatestGames } from "@/components/home/LatestGames";
-import { DemoNotice } from "@/components/games/DemoNotice";
+import { createPublicClient } from "@/lib/supabase/server";
 import { DEMO_GAMES } from "@/lib/demo-games";
+import { LandingExperience, type LandingGame } from "@/components/home/LandingExperience";
 import type { Game } from "@/types";
 
-interface HomeProps {
+interface LandingPageProps {
   params: Promise<{ locale: string }>;
 }
 
-export default async function HomePage({ params }: HomeProps) {
-  const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "home" });
-  const tg = await getTranslations({ locale, namespace: "games" });
-  const supabase = await createClient();
+function localizedTitle(game: Game, locale: string) {
+  return locale === "ar" && game.title_ar ? game.title_ar : game.title;
+}
 
-  let spotlightGame: Game | null = null;
-  let topRatedGames: Game[] = [];
-  let latestGames: Game[] = [];
+function mediaForGame(game: Game) {
+  return [
+    game.header_image,
+    ...(game.screenshots ?? []).map((screenshot) => screenshot.path_full),
+    game.capsule_image,
+  ].filter((source): source is string => Boolean(source));
+}
+
+function serializeGame(game: Game, locale: string): LandingGame {
+  return {
+    id: game.id,
+    title: localizedTitle(game, locale),
+    developer: game.profiles?.display_name || game.developer_name,
+    year: game.release_date ? new Date(game.release_date).getFullYear() : null,
+    media: [...new Set(mediaForGame(game))],
+  };
+}
+
+export async function generateMetadata({ params }: LandingPageProps): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "landing" });
+
+  return {
+    title: t("metadata_title"),
+    description: t("metadata_description"),
+  };
+}
+
+export default async function LandingPage({ params }: LandingPageProps) {
+  const { locale } = await params;
+
+  let games: Game[] = [];
   let usingDemo = false;
 
   try {
-    const [{ data: spotlight }, { data: topRated }, { data: latest }] = await Promise.all([
-      supabase
-        .from("games")
-        .select("*, profiles!games_developer_id_fkey(*)")
-        .eq("status", "approved")
-        .not("spotlight_at", "is", null)
-        .order("spotlight_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("games")
-        .select("*")
-        .eq("status", "approved")
-        .order("average_rating", { ascending: false })
-        .limit(8),
-      supabase
-        .from("games")
-        .select("*")
-        .eq("status", "approved")
-        .order("created_at", { ascending: false })
-        .limit(8),
-    ]);
+    const { data, error } = await createPublicClient()
+      .from("games")
+      .select("*")
+      .eq("status", "approved")
+      .order("created_at", { ascending: false })
+      .limit(4);
 
-    spotlightGame = (spotlight as Game | null) ?? null;
-    topRatedGames = (topRated ?? []) as Game[];
-    latestGames = (latest ?? []) as Game[];
-
-    // Demo fallback: only when the approved catalog is completely empty.
-    // Never appended alongside real games.
-    if (!spotlightGame && topRatedGames.length === 0 && latestGames.length === 0) {
-      usingDemo = true;
-    }
+    if (error) throw error;
+    games = (data ?? []) as Game[];
+    if (games.length === 0) usingDemo = true;
   } catch {
-    // Supabase unreachable: show the static demo catalog instead of an error.
     usingDemo = true;
   }
 
   if (usingDemo) {
-    topRatedGames = [...DEMO_GAMES].sort((a, b) => b.average_rating - a.average_rating);
-    latestGames = [...DEMO_GAMES].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
-    spotlightGame = null;
+    games = [...DEMO_GAMES].sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at)).slice(0, 4);
   }
 
-  // Spotlight first, otherwise the top rated game features above the fold.
-  const feature = spotlightGame ?? topRatedGames[0] ?? null;
-  const shelfGames = spotlightGame
-    ? topRatedGames
-    : topRatedGames.filter((game) => game.id !== feature?.id);
+  const latest = games[0] ? serializeGame(games[0], locale) : null;
+  const previews = games.slice(1, 4).map((game) => serializeGame(game, locale));
 
-  return (
-    <div className="pb-2">
-      {feature ? (
-        <HeroSection game={feature} locale={locale} />
-      ) : (
-        <section className="border-b border-eg-border bg-eg-darker py-8">
-          <div className="store-container">
-            <h1 className="text-base font-semibold text-eg-heading">{t("empty_home")}</h1>
-            <p className="mt-1 text-xs text-eg-text-sub">{t("empty_home_hint")}</p>
-            <Link
-              href="/games"
-              className="mt-3 inline-flex h-8 items-center rounded-sm bg-eg-blue px-3 text-xs font-medium text-[#0f1a24] transition-colors hover:bg-[#8bd2fa]"
-            >
-              {tg("explore_title")}
-            </Link>
-          </div>
-        </section>
-      )}
-
-      {usingDemo && (
-        <div className="store-container pt-4">
-          <DemoNotice />
-        </div>
-      )}
-
-      <FeaturedGames games={shelfGames} locale={locale} />
-      <LatestGames games={latestGames} locale={locale} />
-    </div>
-  );
+  return <LandingExperience locale={locale} latest={latest} previews={previews} usingDemo={usingDemo} />;
 }

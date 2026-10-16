@@ -104,7 +104,7 @@ export default function ContactPage() {
               </p>
               <Link
                 href="/login"
-                className="mt-2.5 inline-flex h-8 items-center rounded-sm bg-eg-blue px-3 text-xs font-medium text-[#0f1a24] transition-colors hover:bg-[#8bd2fa]"
+                className="mt-2.5 inline-flex h-8 items-center rounded-sm bg-eg-blue px-3 text-xs font-medium text-eg-darker transition-colors hover:bg-eg-accent-hover"
               >
                 {t("login_cta")}
               </Link>

@@ -26,14 +26,14 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             ref={ref}
             id={selectId}
             className={cn(
-              "w-full appearance-none rounded-sm border border-eg-border bg-[#131c25] px-3 py-2 pe-9 text-[13px] text-eg-text focus:border-eg-blue/70 focus:outline-none",
-              error && "border-[#c9454f]",
+              "w-full appearance-none rounded-sm border border-eg-border bg-eg-darker px-3 py-2 pe-9 text-[13px] text-eg-text focus:border-eg-blue/70 focus:outline-none",
+              error && "border-eg-red",
               className
             )}
             {...props}
           >
             {options.map((option) => (
-              <option key={option.value} value={option.value} className="bg-[#131c25]">
+              <option key={option.value} value={option.value} className="bg-eg-darker">
                 {option.label}
               </option>
             ))}

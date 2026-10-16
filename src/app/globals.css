@@ -4,12 +4,15 @@
 
 /*
  * EGGameDB storefront tokens.
- * A restrained, desktop-store palette: solid navy/slate surfaces, a blue
- * selection colour, green for free/positive states, and gold reserved for
- * Egyptian provenance only.
+ * A restrained Egyptian palette: warm charcoal surfaces, a deep crimson
+ * structural bar, gold/ochre for every interaction state, ivory body text,
+ * green kept for free/positive states and red for danger or provenance.
  */
 @theme inline {
   --color-eg-gold: var(--eg-gold);
+  --color-eg-accent: var(--eg-accent);
+  --color-eg-accent-hover: var(--eg-accent-hover);
+  --color-eg-red: var(--eg-red);
   --color-eg-blue: var(--eg-blue);
   --color-eg-green: var(--eg-green);
   --color-eg-nav: var(--eg-nav);
@@ -32,36 +35,39 @@
 .dark {
   color-scheme: dark;
 
-  /* Surfaces */
-  --eg-header: #10151a;
-  --eg-nav: #1d3a56;
-  --eg-dark: #16202b;
-  --eg-darker: #111820;
-  --eg-card: #18242f;
-  --eg-surface: #1f2e3c;
+  /* Surfaces — warm charcoal and sand, never navy */
+  --eg-header: #11100e;
+  --eg-nav: #351719;
+  --eg-dark: #1a1712;
+  --eg-darker: #12100d;
+  --eg-card: #211d17;
+  --eg-surface: #2a241b;
 
   /* Lines */
   --eg-border: rgba(255, 255, 255, 0.09);
   --eg-border-strong: rgba(255, 255, 255, 0.16);
 
-  /* Text */
-  --eg-heading: #ffffff;
-  --eg-text: #c7d5e0;
-  --eg-text-sub: #a3b3c2;
-  --eg-muted: #7d8b99;
+  /* Text — warm ivory and sand */
+  --eg-heading: #f3ecdc;
+  --eg-text: #e7dfd0;
+  --eg-text-sub: #bcae98;
+  --eg-muted: #887d6e;
 
-  /* Accents */
-  --eg-blue: #66c0f4;
-  --eg-blue-strong: #3d9fd8;
+  /* Accents — gold/ochre carries interaction, crimson stays structural */
+  --eg-accent: #d6b15a;
+  --eg-accent-hover: #e7c778;
+  /* Legacy token name kept for existing classes; it now renders gold. */
+  --eg-blue: var(--eg-accent);
+  --eg-blue-strong: #b8933f;
   --eg-green: #a1cf4a;
   --eg-green-strong: #74a11f;
-  --eg-gold: #c9a55c;
-  --eg-red: #c9454f;
+  --eg-gold: #cba557;
+  --eg-red: #ce3041;
 
   /* Compatibility aliases kept for untouched dashboards and forms */
-  --eg-req-bg: #131b23;
+  --eg-req-bg: #181510;
   --eg-req-li-sep: rgba(255, 255, 255, 0.07);
-  --eg-scrollbar: #10151a;
+  --eg-scrollbar: #12100d;
   --eg-cyan: var(--eg-blue);
   --eg-cyan-strong: var(--eg-blue-strong);
 }
@@ -91,8 +97,8 @@ body {
 }
 
 ::selection {
-  background: rgba(102, 192, 244, 0.3);
-  color: #fff;
+  background: rgba(214, 177, 90, 0.32);
+  color: #fdf8ec;
 }
 
 ::-webkit-scrollbar {
@@ -103,11 +109,11 @@ body {
   background: var(--eg-scrollbar);
 }
 ::-webkit-scrollbar-thumb {
-  background: #2c3e50;
+  background: #3b3327;
   border-radius: 5px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #3d556c;
+  background: #544932;
 }
 
 /* ---------------------------------------------------------------------------
@@ -163,7 +169,7 @@ body {
   height: 5px;
   opacity: 0.5;
   background-image:
-    repeating-linear-gradient(45deg, rgba(201, 165, 92, 0.45) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(45deg, rgba(214, 177, 90, 0.45) 0 1px, transparent 1px 7px),
     repeating-linear-gradient(-45deg, rgba(255, 255, 255, 0.08) 0 1px, transparent 1px 7px);
 }
 

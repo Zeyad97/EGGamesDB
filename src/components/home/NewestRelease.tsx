@@ -1,0 +1,17 @@
+"use client";
+import Image from "next/image";
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
+import { Button } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { formatDate, formatNumber } from "@/lib/utils";
+import { ArrowUpRight, Calendar, PlayCircle, Star, User } from "lucide-react";
+import type { Game } from "@/types";
+
+export function NewestRelease({ game, locale }: { game: Game; locale: string }) {
+  const t = useTranslations("home"); const tg = useTranslations("games");
+  const title = locale === "ar" && game.title_ar ? game.title_ar : game.title;
+  const desc = locale === "ar" && game.short_description_ar ? game.short_description_ar : game.short_description;
+  const image = game.header_image || game.capsule_image || game.screenshots?.[0]?.path_full;
+  return <section className="store-section relative overflow-hidden bg-[#0a1726]"><div className="absolute inset-0 opacity-20">{image && <Image src={image} alt="" fill className="object-cover blur-2xl" />}</div><div className="absolute inset-0 bg-[#07111f]/85" /><div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8"><div className="mb-8 flex items-end justify-between gap-4"><div><p className="mb-2 text-xs font-bold uppercase tracking-[.2em] text-[#d6a85a]">{t("newest_release")}</p><h2 className="text-2xl font-black text-white sm:text-3xl">{t("newest_subtitle")}</h2></div><span className="hidden border border-[#c9454f]/40 bg-[#c9454f]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[.18em] text-red-200 sm:block">{t("newest_badge")}</span></div><div className="grid overflow-hidden border border-eg-border bg-[#101d2d]/85 lg:grid-cols-[1.15fr_.85fr]"><div className="relative min-h-[18rem] lg:min-h-[24rem]">{image ? <Image src={image} alt={title} fill className="object-cover" /> : <div className="flex h-full items-center justify-center bg-[#14263a] text-eg-muted" />}</div><div className="flex flex-col justify-center p-6 sm:p-9"><Badge variant="gold" className="mb-5 w-fit">{t("newest_badge")} · {t("curated")}</Badge><Link href={`/games/${game.slug}`}><h3 className="text-3xl font-black leading-tight text-white transition-colors hover:text-[#8bd2fa] sm:text-4xl">{title}</h3></Link><p className="mt-4 line-clamp-3 text-sm leading-7 text-eg-text-sub">{desc}</p><div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-xs text-eg-muted"><span className="flex items-center gap-1.5"><User size={14} className="text-[#d6a85a]" />{game.developer_name}</span>{game.release_date && <span className="flex items-center gap-1.5"><Calendar size={14} className="text-[#d6a85a]" />{formatDate(game.release_date, locale)}</span>}{game.average_rating > 0 && <span className="flex items-center gap-1.5"><Star size={14} className="fill-[#d6a85a] text-[#d6a85a]" />{game.average_rating.toFixed(1)} <span>({formatNumber(game.rating_count, locale)})</span></span>}</div>{game.genres.length > 0 && <div className="mt-5 flex flex-wrap gap-2">{game.genres.slice(0, 4).map((genre) => <Badge key={genre} variant="default">{genre}</Badge>)}</div>}<div className="mt-7 flex flex-wrap gap-3"><Link href={`/games/${game.slug}`}><Button className="gap-2">{t("view_newest")}<ArrowUpRight size={16} /></Button></Link>{game.videos?.length > 0 && <Link href={`/games/${game.slug}#video`}><Button variant="secondary" className="gap-2"><PlayCircle size={16} />{tg("watch_trailer")}</Button></Link>}</div></div></div></div></section>;
+}

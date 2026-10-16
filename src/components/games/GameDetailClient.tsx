@@ -492,8 +492,8 @@ function ReviewsSection({
                   className={
                     "inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 text-[11px] transition-colors " +
                     (!isRecommended
-                      ? "border-[#c9454f]/40 bg-[#c9454f]/10 text-red-300"
-                      : "border-eg-border text-eg-muted hover:text-white")
+                      ? "border-eg-red/40 bg-eg-red/10 text-red-300"
+                      : "border-eg-border text-eg-muted hover:text-eg-heading")
                   }
                 >
                   <ThumbsDown size={11} aria-hidden="true" />
@@ -521,7 +521,7 @@ function ReviewsSection({
           <p className="mt-1 text-xs text-eg-muted">{t("login_to_review")}</p>
           <Link
             href="/login"
-            className="mt-3 inline-flex h-8 items-center rounded-sm bg-eg-blue px-3 text-xs font-medium text-[#0f1a24] transition-colors hover:bg-[#8bd2fa]"
+            className="mt-3 inline-flex h-8 items-center rounded-sm bg-eg-blue px-3 text-xs font-medium text-eg-darker transition-colors hover:bg-eg-accent-hover"
           >
             {t("login_review")}
           </Link>

@@ -10,10 +10,10 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const variants: Record<NonNullable<ButtonProps["variant"]>, string> = {
-  primary: "bg-eg-blue text-[#0f1a24] hover:bg-[#8bd2fa]",
-  secondary: "border border-eg-border bg-eg-surface text-eg-text hover:border-eg-border-strong hover:text-white",
-  ghost: "text-eg-text-sub hover:bg-white/[0.06] hover:text-white",
-  danger: "bg-[#c9454f] text-white hover:bg-[#db5962]",
+  primary: "bg-eg-blue text-eg-darker hover:bg-eg-accent-hover",
+  secondary: "border border-eg-border bg-eg-surface text-eg-text hover:border-eg-border-strong hover:text-eg-heading",
+  ghost: "text-eg-text-sub hover:bg-white/[0.06] hover:text-eg-heading",
+  danger: "bg-eg-red text-white hover:bg-[#e04a56]",
   outline: "border border-eg-blue/50 text-eg-blue hover:bg-eg-blue/10",
   success: "bg-eg-green text-[#131c0c] font-semibold hover:bg-[#b4dd63]",
 };

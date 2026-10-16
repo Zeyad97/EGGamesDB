@@ -27,10 +27,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={cn(
-              "w-full rounded-sm border border-eg-border bg-[#131c25] px-3 py-2 text-[13px] text-eg-text placeholder:text-eg-muted focus:border-eg-blue/70 focus:outline-none",
+              "w-full rounded-sm border border-eg-border bg-eg-darker px-3 py-2 text-[13px] text-eg-text placeholder:text-eg-muted focus:border-eg-blue/70 focus:outline-none",
               prefix && "ps-9",
               suffix && "pe-9",
-              error && "border-[#c9454f]",
+              error && "border-eg-red",
               className
             )}
             {...props}
@@ -64,8 +64,8 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           ref={ref}
           id={inputId}
           className={cn(
-            "w-full resize-none rounded-sm border border-eg-border bg-[#131c25] px-3 py-2 text-[13px] text-eg-text placeholder:text-eg-muted focus:border-eg-blue/70 focus:outline-none",
-            error && "border-[#c9454f]",
+            "w-full resize-none rounded-sm border border-eg-border bg-eg-darker px-3 py-2 text-[13px] text-eg-text placeholder:text-eg-muted focus:border-eg-blue/70 focus:outline-none",
+            error && "border-eg-red",
             className
           )}
           {...props}

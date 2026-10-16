@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/hooks/useCarousel";
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
@@ -10,13 +12,13 @@ import {
   LogOut,
   Menu,
   PlusCircle,
-  Search,
   Shield,
   User,
   X,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Wordmark } from "@/components/layout/Brand";
+import { StoreSearch } from "@/components/layout/StoreSearch";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthStore } from "@/store/auth";
 import { cn } from "@/lib/utils";
@@ -36,8 +38,8 @@ export function Navbar({ locale }: { locale: string }) {
 
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [query, setQuery] = useState("");
   const accountRef = useRef<HTMLDivElement>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   const otherLocale = locale === "ar" ? "en" : "ar";
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin";
@@ -64,14 +66,14 @@ export function Navbar({ locale }: { locale: string }) {
   }, [accountOpen]);
 
   const primaryLinks = [
-    { href: "/", label: t("store") },
+    { href: "/store", label: t("store") },
     { href: "/games", label: t("games") },
     { href: "/developers", label: t("developers") },
     { href: "/about", label: t("about") },
   ];
 
   const discoverLinks = [
-    { href: "/", label: t("featured") },
+    { href: "/store", label: t("featured") },
     { href: "/games?sort=release_date", label: t("new_releases") },
     { href: "/games?sort=average_rating", label: t("top_rated") },
     { href: "/games?sort=view_count", label: t("most_viewed") },
@@ -102,12 +104,31 @@ export function Navbar({ locale }: { locale: string }) {
     router.push("/");
   };
 
-  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const term = query.trim();
-    setMobileOpen(false);
-    router.push(term ? `/games?search=${encodeURIComponent(term)}` : "/games");
-  };
+  if (pathname === "/") {
+    return (
+      <motion.header
+        className="absolute inset-x-0 top-0 z-50 bg-transparent"
+        initial={prefersReducedMotion ? false : { opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <div className="flex h-16 items-center justify-between px-6 sm:px-10 lg:px-16">
+          <span aria-label="EGGameDB">
+            <Wordmark />
+          </span>
+          <Link
+            href={pathname}
+            locale={otherLocale}
+            className="rounded-sm px-2.5 py-1.5 text-[13px] text-eg-heading/90 transition-colors hover:bg-black/20 hover:text-white"
+            aria-label={tc("language")}
+          >
+            <Globe2 size={15} aria-hidden="true" className="inline-block align-[-3px]" />
+            <span className="ms-1.5">{locale === "en" ? "العربية" : "English"}</span>
+          </Link>
+        </div>
+      </motion.header>
+    );
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-black/50 bg-eg-header">
@@ -132,7 +153,7 @@ export function Navbar({ locale }: { locale: string }) {
                 "rounded-sm px-3 py-1.5 text-[13px] transition-colors",
                 isActive(link.href)
                   ? "bg-white/[0.07] text-white"
-                  : "text-eg-text-sub hover:bg-white/[0.05] hover:text-white"
+                  : "text-eg-text-sub hover:bg-white/[0.05] hover:text-eg-heading"
               )}
             >
               {link.label}
@@ -144,7 +165,7 @@ export function Navbar({ locale }: { locale: string }) {
           <Link
             href={pathname}
             locale={otherLocale}
-            className="hidden items-center gap-1.5 rounded-sm px-2 py-1.5 text-[13px] text-eg-text-sub transition-colors hover:bg-white/[0.05] hover:text-white sm:flex"
+            className="hidden items-center gap-1.5 rounded-sm px-2 py-1.5 text-[13px] text-eg-text-sub transition-colors hover:bg-white/[0.05] hover:text-eg-heading sm:flex"
             aria-label={tc("language")}
           >
             <Globe2 size={15} aria-hidden="true" />
@@ -158,7 +179,7 @@ export function Navbar({ locale }: { locale: string }) {
                 onClick={() => setAccountOpen((open) => !open)}
                 aria-expanded={accountOpen}
                 aria-haspopup="menu"
-                className="flex items-center gap-2 rounded-sm px-1.5 py-1 text-[13px] text-eg-text-sub transition-colors hover:bg-white/[0.05] hover:text-white"
+                className="flex items-center gap-2 rounded-sm px-1.5 py-1 text-[13px] text-eg-text-sub transition-colors hover:bg-white/[0.05] hover:text-eg-heading"
               >
                 <Avatar
                   src={profile.avatar_url}
@@ -191,7 +212,7 @@ export function Navbar({ locale }: { locale: string }) {
                       href={href}
                       role="menuitem"
                       onClick={() => setAccountOpen(false)}
-                      className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-eg-text-sub transition-colors hover:bg-white/[0.06] hover:text-white"
+                      className="flex items-center gap-2.5 px-3 py-2 text-[13px] text-eg-text-sub transition-colors hover:bg-white/[0.06] hover:text-eg-heading"
                     >
                       <Icon size={14} aria-hidden="true" />
                       {label}
@@ -213,13 +234,13 @@ export function Navbar({ locale }: { locale: string }) {
             <div className="hidden items-center gap-1.5 md:flex">
               <Link
                 href="/login"
-                className="rounded-sm px-3 py-1.5 text-[13px] text-eg-text-sub transition-colors hover:bg-white/[0.05] hover:text-white"
+                className="rounded-sm px-3 py-1.5 text-[13px] text-eg-text-sub transition-colors hover:bg-white/[0.05] hover:text-eg-heading"
               >
                 {t("login")}
               </Link>
               <Link
                 href="/register"
-                className="rounded-sm bg-eg-blue px-3 py-1.5 text-[13px] font-medium text-[#0f1a24] transition-colors hover:bg-[#8bd2fa]"
+                className="rounded-sm bg-eg-blue px-3 py-1.5 text-[13px] font-medium text-eg-darker transition-colors hover:bg-eg-accent-hover"
               >
                 {t("register")}
               </Link>
@@ -232,7 +253,7 @@ export function Navbar({ locale }: { locale: string }) {
             aria-expanded={mobileOpen}
             aria-controls="mobile-navigation"
             aria-label={mobileOpen ? tc("close") : tc("menu")}
-            className="flex h-8 w-8 items-center justify-center rounded-sm text-eg-text-sub transition-colors hover:bg-white/[0.05] hover:text-white md:hidden"
+            className="flex h-8 w-8 items-center justify-center rounded-sm text-eg-text-sub transition-colors hover:bg-white/[0.05] hover:text-eg-heading md:hidden"
           >
             {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -251,8 +272,8 @@ export function Navbar({ locale }: { locale: string }) {
                 className={cn(
                   "rounded-sm px-2.5 py-1 text-[13px] whitespace-nowrap transition-colors",
                   !link.href.includes("?") && isActive(link.href)
-                    ? "bg-black/25 text-white"
-                    : "text-[#d5e6f5] hover:bg-black/20 hover:text-white"
+                    ? "bg-black/30 text-eg-gold"
+                    : "text-eg-text-sub hover:bg-black/20 hover:text-eg-heading"
                 )}
               >
                 {link.label}
@@ -260,29 +281,7 @@ export function Navbar({ locale }: { locale: string }) {
             ))}
           </nav>
 
-          <form onSubmit={handleSearch} role="search" className="ms-auto w-full md:w-auto">
-            <label htmlFor="store-search" className="sr-only">
-              {tc("search")}
-            </label>
-            <div className="flex h-7 items-center overflow-hidden rounded-sm bg-[#0f1a24]/70 focus-within:ring-1 focus-within:ring-eg-blue">
-              <input
-                id="store-search"
-                type="search"
-                name="search"
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder={t("search_store")}
-                className="h-full w-full min-w-0 bg-transparent px-2.5 text-[13px] text-white placeholder:text-[#8fa9bf] focus:outline-none md:w-52"
-              />
-              <button
-                type="submit"
-                aria-label={tc("search")}
-                className="flex h-7 w-8 shrink-0 items-center justify-center text-[#cfe4f5] transition-colors hover:bg-black/25 hover:text-white"
-              >
-                <Search size={14} aria-hidden="true" />
-              </button>
-            </div>
-          </form>
+          <StoreSearch locale={locale} onNavigate={() => setMobileOpen(false)} />
         </div>
       </div>
 
@@ -373,7 +372,7 @@ export function Navbar({ locale }: { locale: string }) {
                   <Link
                     href="/register"
                     onClick={() => setMobileOpen(false)}
-                    className="rounded-sm bg-eg-blue px-2.5 py-1.5 text-[12px] font-medium text-[#0f1a24]"
+                    className="rounded-sm bg-eg-blue px-2.5 py-1.5 text-[12px] font-medium text-eg-darker"
                   >
                     {t("register")}
                   </Link>

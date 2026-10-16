@@ -3,8 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { ChevronLeft, ChevronRight, Expand, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Expand, Pause, Play, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAutoAdvance, usePrefersReducedMotion } from "@/lib/hooks/useCarousel";
 import type { Screenshot } from "@/types";
 
 interface GameScreenshotsProps {
@@ -24,17 +25,23 @@ interface GalleryItem {
 }
 
 const controlClasses =
-  "flex h-8 w-8 items-center justify-center rounded-sm border border-white/15 bg-black/65 text-white/80 transition-colors hover:border-white/30 hover:text-white";
+  "flex h-8 w-8 items-center justify-center rounded-sm border border-white/15 bg-black/65 text-white/80 transition-colors hover:border-eg-gold/70 hover:text-eg-gold";
 
 /**
  * Product gallery: main image, always-available prev/next controls, thumbnail
- * strip, arrow-key support and a fullscreen view. Falls back to a single cover
- * image when the game has no screenshots.
+ * strip, arrow-key support and a fullscreen view. Multi-image galleries also
+ * auto-advance until the visitor pauses them or points at them. Falls back to a
+ * single cover image when the game has no screenshots.
  */
 export function GameScreenshots({ screenshots, title, fallbackImage }: GameScreenshotsProps) {
   const t = useTranslations("games");
   const [current, setCurrent] = useState(0);
   const [lightbox, setLightbox] = useState(false);
+  const [interacting, setInteracting] = useState(false);
+  /** `null` means "follow the system preference"; a press stores explicit intent. */
+  const [playIntent, setPlayIntent] = useState<boolean | null>(null);
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const playing = playIntent ?? !prefersReducedMotion;
 
   const items: GalleryItem[] = screenshots.length
     ? screenshots.map((screenshot, index) => ({
@@ -80,6 +87,13 @@ export function GameScreenshots({ screenshots, title, fallbackImage }: GameScree
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [lightbox, showPrevious, showNext]);
 
+  useAutoAdvance({
+    enabled: playing && !interacting && !lightbox,
+    total,
+    advance: showNext,
+    resetKey: current,
+  });
+
   if (!total) {
     return (
       <p className="border border-eg-border bg-eg-card px-4 py-10 text-center text-xs text-eg-muted">
@@ -94,21 +108,37 @@ export function GameScreenshots({ screenshots, title, fallbackImage }: GameScree
     <div>
       <div
         role="group"
+        aria-roledescription={t("carousel_role")}
         aria-label={t("gallery_label", { title })}
         tabIndex={0}
         onKeyDown={(event) => {
           if (event.key === "ArrowLeft") showPrevious();
           if (event.key === "ArrowRight") showNext();
         }}
-        className="relative aspect-video overflow-hidden border border-eg-border bg-[#0d141b]"
+        onMouseEnter={() => setInteracting(true)}
+        onMouseLeave={() => setInteracting(false)}
+        onFocusCapture={() => setInteracting(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+            setInteracting(false);
+          }
+        }}
+        className="relative aspect-video overflow-hidden border border-eg-border bg-eg-darker"
       >
-        <Image
-          src={active.full}
-          alt={active.alt}
-          fill
-          sizes="(max-width: 1024px) 100vw, 720px"
-          className={active.contain ? "object-contain" : "object-cover"}
-        />
+        <div
+          role="group"
+          aria-roledescription={t("slide_role")}
+          aria-label={t("slide_label", { index: current + 1, total })}
+          className="absolute inset-0"
+        >
+          <Image
+            src={active.full}
+            alt={active.alt}
+            fill
+            sizes="(max-width: 1024px) 100vw, 720px"
+            className={active.contain ? "object-contain" : "object-cover"}
+          />
+        </div>
 
         {total > 1 && (
           <>
@@ -141,9 +171,19 @@ export function GameScreenshots({ screenshots, title, fallbackImage }: GameScree
         </button>
 
         {total > 1 && (
-          <span className="absolute bottom-2 end-2 rounded-sm bg-black/70 px-1.5 py-0.5 text-[11px] text-white">
-            {current + 1} / {total}
-          </span>
+          <>
+            <button
+              type="button"
+              onClick={() => setPlayIntent(!playing)}
+              aria-label={playing ? t("pause_slideshow") : t("play_slideshow")}
+              className={cn(controlClasses, "absolute bottom-2 start-2")}
+            >
+              {playing ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
+            </button>
+            <span className="absolute bottom-2 end-2 rounded-sm bg-black/70 px-1.5 py-0.5 text-[11px] text-white">
+              {current + 1} / {total}
+            </span>
+          </>
         )}
       </div>
 
