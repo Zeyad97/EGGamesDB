@@ -2,8 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { slugify } from "@/lib/utils";
 import { gameSubmissionSchema } from "@/lib/validators/game";
+import { sanitizeGameDescription } from "@/lib/security/sanitize-html";
+import { isAllowedStateChangeOrigin } from "@/lib/security/request";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 export async function POST(req: NextRequest) {
+  if (!isAllowedStateChangeOrigin(req)) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!(await enforceRateLimit(req, "games-submit", 10))) {
+    return NextResponse.json({ error: "Rate limit exceeded. Max 10 requests/minute." }, { status: 429 });
+  }
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -44,8 +51,8 @@ export async function POST(req: NextRequest) {
       title_ar: data.title_ar,
       short_description: data.short_description,
       short_description_ar: data.short_description_ar,
-      long_description: data.long_description,
-      long_description_ar: data.long_description_ar,
+      long_description: sanitizeGameDescription(data.long_description),
+      long_description_ar: sanitizeGameDescription(data.long_description_ar),
       steam_app_id: data.steam_app_id || null,
       steam_url: data.steam_url || null,
       tags: data.tags,
@@ -62,26 +69,6 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-  // Notify admins (insert notification)
-  if (!isDraft) {
-    const { data: admins } = await supabase
-      .from("profiles")
-      .select("id")
-      .in("role", ["admin", "super_admin"]);
-
-    if (admins?.length) {
-      await supabase.from("notifications").insert(
-        admins.map((a) => ({
-          user_id: a.id,
-          title: "New Game Submission",
-          message: `"${data.title}" submitted for review`,
-          type: "info",
-          action_url: `/admin`,
-        }))
-      );
-    }
-  }
 
   return NextResponse.json({ game }, { status: 201 });
 }

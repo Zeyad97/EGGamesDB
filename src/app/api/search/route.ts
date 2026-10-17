@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createPublicClient } from "@/lib/supabase/server";
 import { DEMO_GAMES } from "@/lib/demo-games";
 import type { Game } from "@/types";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 // Search suggestions are per-query and always read live catalog data, so this
 // handler runs dynamically on every request. Short public caching (see
@@ -91,6 +92,7 @@ function json(results: SearchSuggestion[]) {
 }
 
 export async function GET(request: NextRequest) {
+  if (!(await enforceRateLimit(request, "search", 60))) return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   const raw = request.nextUrl.searchParams.get("q") ?? "";
   const query = raw.trim();
 

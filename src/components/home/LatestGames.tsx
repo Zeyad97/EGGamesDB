@@ -23,8 +23,8 @@ export function LatestGames({ games, locale }: LatestGamesProps) {
 
   return (
     <section className="store-section py-5" aria-labelledby="shelf-new-trending">
-      <div className="store-container grid gap-6 lg:grid-cols-[minmax(0,1fr)_200px]">
-        <div>
+      <div className="store-container grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_200px]">
+        <div className="min-w-0">
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <h2 id="shelf-new-trending" className="store-title">
               {t("new_trending")}

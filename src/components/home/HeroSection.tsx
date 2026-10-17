@@ -88,8 +88,8 @@ export function HeroSection({ game, locale }: HeroSectionProps) {
   return (
     <section className="border-b border-eg-border bg-eg-darker py-5" aria-labelledby="storefront-feature">
       <div className="store-container">
-        <div className="grid gap-5 lg:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)]">
-          <div>
+        <div className="grid min-w-0 gap-5 lg:grid-cols-[minmax(0,1.75fr)_minmax(0,1fr)]">
+          <div className="min-w-0">
             <div
               role="group"
               aria-roledescription={tg("carousel_role")}

@@ -43,7 +43,7 @@ export function GameCard({ game, locale = "en", variant = "default", className }
       <Link
         href={`/games/${game.slug}`}
         className={cn(
-          "group flex gap-3 border border-transparent px-2.5 py-2 transition-colors hover:border-eg-border hover:bg-eg-surface",
+          "group flex min-w-0 gap-3 border border-transparent px-2.5 py-2 transition-colors hover:border-eg-border hover:bg-eg-surface",
           className
         )}
       >

@@ -1,9 +1,12 @@
 import type { SteamGameData } from "@/types";
+import { sanitizeGameDescription } from "@/lib/security/sanitize-html";
 
 const STEAM_APP_DETAILS = "https://store.steampowered.com/api/appdetails";
 const STEAM_SEARCH_URL = "https://store.steampowered.com/api/storesearch";
 
 export async function fetchSteamGameData(appId: string): Promise<SteamGameData | null> {
+  // Only ever fetch appdetails for a numeric Steam app id.
+  if (!/^\d+$/.test(appId.trim())) return null;
   try {
     const res = await fetch(
       `${STEAM_APP_DETAILS}?appids=${appId}&cc=us&l=english`,
@@ -37,7 +40,7 @@ export function steamDataToGameFields(data: SteamGameData) {
   return {
     title: data.name,
     short_description: data.short_description,
-    long_description: data.detailed_description,
+    long_description: sanitizeGameDescription(data.detailed_description),
     header_image: data.header_image,
     capsule_image: data.capsule_image,
     steam_app_id: String(data.steam_appid),

@@ -1,5 +1,8 @@
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import { createPublicClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 import { GameDetailClient } from "@/components/games/GameDetailClient";
 import { DEMO_GAMES, findDemoGame } from "@/lib/demo-games";
 import type { Game, GameReview } from "@/types";
@@ -115,11 +118,31 @@ export default async function GamePage({ params }: GamePageProps) {
     // Reviews/related are non-critical: render the game without them.
   }
 
-  // Increment view count (fire-and-forget)
-  supabase.rpc("increment_view_count", { game_id: game.id }).then(
-    () => {},
-    () => {}
-  );
+  // Increment view count server-side (fire-and-forget, never blocks render).
+  // Anonymous visitors cannot call increment_view_count, so the service role
+  // counts the view after a per-IP rate-limit check (1 per game per 15 min).
+  // Demo games return early above and are never counted.
+  try {
+    const headerList = await headers();
+    enforceRateLimit(headerList, `view:${game.id}`, 1, 900).then(
+      (allowed) => {
+        if (!allowed) return;
+        try {
+          createAdminClient()
+            .rpc("increment_view_count_server", { game_id: game.id })
+            .then(
+              () => {},
+              () => {}
+            );
+        } catch {
+          // View counting must never break the page.
+        }
+      },
+      () => {}
+    );
+  } catch {
+    // View counting must never break the page.
+  }
 
   const localizedName = locale === "ar" && game.title_ar ? game.title_ar : game.title;
   const localizedDescription = locale === "ar" && game.short_description_ar ? game.short_description_ar : game.short_description;

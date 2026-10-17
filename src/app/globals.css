@@ -83,7 +83,6 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  overflow-x: hidden;
   background: var(--eg-dark);
   color: var(--eg-text);
   font-family: var(--font-sans);

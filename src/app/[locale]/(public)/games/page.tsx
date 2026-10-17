@@ -155,7 +155,7 @@ export default async function GamesPage({ params, searchParams }: GamesPageProps
 
         {showSpotlight && <SpotlightBanner game={spotlightGame as Game} locale={locale} />}
 
-        <div className="grid gap-x-6 gap-y-5 lg:grid-cols-[200px_minmax(0,1fr)]">
+        <div className="grid min-w-0 grid-cols-1 gap-x-6 gap-y-5 lg:grid-cols-[200px_minmax(0,1fr)]">
           <GameFiltersBar currentFilters={filters} totalCount={count ?? 0} locale={locale} />
           <GamesGrid
             games={(games ?? []) as Game[]}

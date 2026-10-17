@@ -1,25 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { fetchSteamGameData, steamDataToGameFields } from "@/lib/steam";
 import { extractSteamAppId } from "@/lib/utils";
-
-// Rate limit: simple in-memory (use Redis for production)
-const rateMap = new Map<string, { count: number; reset: number }>();
-
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const entry = rateMap.get(ip);
-  if (!entry || now > entry.reset) {
-    rateMap.set(ip, { count: 1, reset: now + 60_000 });
-    return true;
-  }
-  if (entry.count >= 10) return false;
-  entry.count++;
-  return true;
-}
+import { enforceRateLimit } from "@/lib/security/rate-limit";
 
 export async function GET(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for") ?? "unknown";
-  if (!checkRateLimit(ip)) {
+  if (!(await enforceRateLimit(req, "steam", 10))) {
     return NextResponse.json({ error: "Rate limit exceeded. Max 10 requests/minute." }, { status: 429 });
   }
 

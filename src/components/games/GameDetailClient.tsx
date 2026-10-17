@@ -30,6 +30,7 @@ import { GameVideos } from "@/components/games/GameVideos";
 import { SystemRequirements } from "@/components/games/SystemRequirements";
 import { createClient } from "@/lib/supabase/client";
 import { isDemoGame } from "@/lib/demo-games";
+import { sanitizeGameDescription } from "@/lib/security/sanitize-html";
 import { useAuthStore } from "@/store/auth";
 import { formatDate, formatNumber } from "@/lib/utils";
 import type { Game, GameReview, Profile } from "@/types";
@@ -231,7 +232,7 @@ export function GameDetailClient({ game, reviews, relatedGames, locale }: GameDe
               className="pt-4"
             >
               {activeTab === "about" && (
-                <div className="prose-game" dangerouslySetInnerHTML={{ __html: longDescription }} />
+                <div className="prose-game" dangerouslySetInnerHTML={{ __html: sanitizeGameDescription(longDescription) }} />
               )}
               {activeTab === "requirements" && (
                 <SystemRequirements
@@ -336,7 +337,7 @@ export function GameDetailClient({ game, reviews, relatedGames, locale }: GameDe
         <section className="store-section mt-6 py-5">
           <div className="store-container">
             <h2 className="store-title mb-3">{t("related")}</h2>
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
               {relatedGames.slice(0, 6).map((related) => (
                 <GameCard key={related.id} game={related as Game} locale={locale} variant="compact" />
               ))}

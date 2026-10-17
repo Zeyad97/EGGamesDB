@@ -1,0 +1,43 @@
+-- Manual security verification checklist. Run only in a disposable Supabase project.
+-- Do NOT run this against production. Substitute JWTs for two ordinary users, a contributor,
+-- an admin, and a super_admin. The statements below are intentionally commented out.
+--
+-- 1. As authenticated ordinary user A:
+-- SET LOCAL role authenticated;
+-- SET LOCAL request.jwt.claim.sub = '<user-a-uuid>';
+-- UPDATE public.profiles SET role='super_admin' WHERE id='<user-a-uuid>';
+-- Expected: rejected by profiles_own_update policy/trigger.
+-- UPDATE public.profiles SET developer_status='approved' WHERE id='<user-a-uuid>';
+-- Expected: rejected; only none/rejected -> pending self-application is permitted.
+--
+-- 2. As contributor A, try INSERT games with developer_id=user B, status='approved',
+--    reviewed_by non-null, spotlight_at non-null, nonzero view_count/rating_count,
+--    or metacritic_score set. Each must be rejected. A plain draft/pending owned by A passes.
+-- Try UPDATE own draft to approved / change developer_id / set spotlight or counters: rejected.
+-- Owner resubmission passes: UPDATE own rejected game to pending while clearing
+--    rejection_reason to NULL; any other rejection_reason edit is rejected.
+-- Owner UPDATE of own pending game passes; owner UPDATE of an approved game is rejected.
+-- Try DELETE own approved game: rejected; own draft/rejected deletion is allowed.
+--
+-- 3. As admin, verify approve/reject, rejection reason/reviewer, spotlight, approved-game
+--    deletion, review/message deletion, developer application approval/rejection are allowed.
+-- Admin promotion/demotion of ordinary users is allowed, but admin cannot grant admin or
+--    super_admin, mutate a super_admin, or demote the last super_admin.
+-- As super_admin, role grants/revocations work except demoting/deleting the last super_admin.
+--
+-- 4. As user A, attempt to update review.user_id/game_id/helpful_count: rejected; own review
+--    content/rating updates work. Reports must have reporter_id=auth.uid(), status=open,
+--    resolved_by=NULL; notifications cannot be inserted by a contributor.
+--
+-- 5. Storage: upload game-assets/<user-a-uuid>/file.jpg as contributor succeeds; upload to
+--    another user's prefix or as ordinary user fails. Updates/deletes are owner-only. Only
+--    jpeg/png/webp/gif pass; game-assets limit is 10 MiB; avatars limit is 2 MiB.
+--
+-- 6. Insert >5 reviews, >3 reports, or >3 contact_messages in one UTC/database minute as one
+--    user: excess inserts fail. Validate max name/email/subject/message lengths.
+--
+-- Inspect active policies/functions after migration:
+-- SELECT schemaname,tablename,policyname,cmd,qual,with_check FROM pg_policies
+-- WHERE schemaname IN ('public','storage') ORDER BY schemaname,tablename,policyname;
+-- SELECT proname,prosecdef,proconfig FROM pg_proc JOIN pg_namespace n ON n.oid=pronamespace
+-- WHERE n.nspname='public' AND prosecdef;

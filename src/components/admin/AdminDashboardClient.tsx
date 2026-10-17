@@ -133,9 +133,9 @@ export function AdminDashboardClient({
   const handleDeleteUser = async (userId: string) => {
     if (!confirm(t("confirm_delete_user"))) return;
     setProcessing(`deluser-${userId}`);
-    const { error } = await supabase.from("profiles").delete().eq("id", userId);
+    const response = await fetch(`/api/admin/users/${encodeURIComponent(userId)}`, { method: "DELETE" });
     setProcessing(null);
-    if (error) { toast.error(error.message); return; }
+    if (!response.ok) { toast.error("Unable to delete user"); return; }
     toast.success(t("toast_user_deleted"));
   };
 
