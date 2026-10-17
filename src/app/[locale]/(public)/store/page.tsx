@@ -7,9 +7,16 @@ import { LatestGames } from "@/components/home/LatestGames";
 import { DemoNotice } from "@/components/games/DemoNotice";
 import { DEMO_GAMES } from "@/lib/demo-games";
 import type { Game } from "@/types";
+import { SITE_URL, buildAlternates } from "@/lib/site";
 
 interface HomeProps {
   params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({ params }: HomeProps) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+  return { title: t("store_title"), description: t("store_description"), alternates: buildAlternates(locale, "/store") };
 }
 
 export default async function HomePage({ params }: HomeProps) {
@@ -73,8 +80,14 @@ export default async function HomePage({ params }: HomeProps) {
     ? topRatedGames
     : topRatedGames.filter((game) => game.id !== feature?.id);
 
+  const webSiteSchema = { "@context": "https://schema.org", "@type": "WebSite", name: "EGGameDB", url: `${SITE_URL}/${locale}`, potentialAction: { "@type": "SearchAction", target: `${SITE_URL}/${locale}/games?search={search_term_string}`, "query-input": "required name=search_term_string" } };
+  const organizationSchema = { "@context": "https://schema.org", "@type": "Organization", name: "EGGameDB", url: SITE_URL, logo: `${SITE_URL}/icon`, sameAs: ["https://github.com/Zeyad97/EGGamesDB"] };
+
   return (
     <div className="pb-2">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema).replace(/</g, "\\u003c") }} />
+      <h1 className="store-container pt-2 text-base font-semibold text-eg-heading">{t("hero_title")}</h1>
       {feature ? (
         <HeroSection game={feature} locale={locale} />
       ) : (

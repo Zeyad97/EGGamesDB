@@ -9,6 +9,7 @@ import { GameCard } from "@/components/games/GameCard";
 import { EgyptFlag } from "@/components/layout/Brand";
 import { formatDate, formatNumber } from "@/lib/utils";
 import type { Game, Profile } from "@/types";
+import { buildAlternates } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -17,8 +18,14 @@ interface DeveloperPageProps {
 }
 
 export async function generateMetadata({ params }: DeveloperPageProps) {
-  const { username } = await params;
-  return { title: `${username} — EGGameDB Developer` };
+  const { locale, username } = await params;
+  const t = await getTranslations({ locale, namespace: "seo" });
+  let name = username;
+  try {
+    const { data } = await createPublicClient().from("profiles").select("display_name, username").eq("username", username).single();
+    name = data?.display_name || data?.username || username;
+  } catch {}
+  return { title: t("developer_title", { name }), description: t("developer_description", { name }), alternates: buildAlternates(locale, `/developers/${username}`) };
 }
 
 export default async function DeveloperPage({ params }: DeveloperPageProps) {

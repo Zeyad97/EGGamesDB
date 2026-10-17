@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
+import { buildAlternates } from "@/lib/site";
 
 interface ContactLayoutProps {
   children: React.ReactNode;
@@ -8,8 +9,8 @@ interface ContactLayoutProps {
 
 export async function generateMetadata({ params }: ContactLayoutProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "contact" });
-  return { title: t("meta_title"), description: t("subtitle") };
+  const t = await getTranslations({ locale, namespace: "seo" });
+  return { title: t("contact_title"), description: t("contact_description"), alternates: buildAlternates(locale, "/contact") };
 }
 
 /** Metadata-only wrapper: the contact form itself is a client component. */

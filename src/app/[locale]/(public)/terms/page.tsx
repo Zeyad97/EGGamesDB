@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildAlternates } from "@/lib/site";
 import { getTranslations } from "next-intl/server";
 
 interface TermsPageProps {
@@ -18,8 +19,8 @@ const sectionKeys = [
 
 export async function generateMetadata({ params }: TermsPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "terms" });
-  return { title: t("meta_title") };
+  const t = await getTranslations({ locale, namespace: "seo" });
+  return { title: t("terms_title"), description: t("terms_description"), alternates: buildAlternates(locale, "/terms") };
 }
 
 export default async function TermsPage({ params }: TermsPageProps) {

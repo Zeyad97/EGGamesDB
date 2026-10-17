@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildAlternates } from "@/lib/site";
 import { getTranslations } from "next-intl/server";
 
 interface PrivacyPageProps {
@@ -17,8 +18,8 @@ const sectionKeys = [
 
 export async function generateMetadata({ params }: PrivacyPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "privacy" });
-  return { title: t("meta_title") };
+  const t = await getTranslations({ locale, namespace: "seo" });
+  return { title: t("privacy_title"), description: t("privacy_description"), alternates: buildAlternates(locale, "/privacy") };
 }
 
 export default async function PrivacyPage({ params }: PrivacyPageProps) {

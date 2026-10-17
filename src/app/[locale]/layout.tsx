@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { SITE_URL } from "@/lib/site";
 import { Providers } from "@/components/layout/Providers";
 import "../globals.css";
 
@@ -16,17 +17,27 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: LocaleLayoutProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "home" });
+  const t = await getTranslations({ locale, namespace: "seo" });
   return {
     title: {
-      default: "EGGameDB — Egyptian Games on Steam",
+      default: t("default_title"),
       template: "%s | EGGameDB",
     },
-    description: t("hero_subtitle"),
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
+    description: t("default_description"),
+    metadataBase: new URL(SITE_URL),
+    applicationName: "EGGameDB",
+    keywords: locale === "ar"
+      ? ["ألعاب مصرية", "العاب مصرية", "ألعاب", "ألعاب مطورين مصريين", "الألعاب المصرية", "ألعاب مستقلة مصرية"]
+      : ["Egyptian games", "games made in Egypt", "Egyptian indie games", "Egyptian game developers", "Egyptian games database"],
+    authors: [{ name: "EGGameDB" }],
+    creator: "EGGameDB",
+    category: "games",
+    robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large" } },
+    formatDetection: { email: false, address: false, telephone: false },
     openGraph: {
       type: "website",
       locale: locale === "ar" ? "ar_EG" : "en_US",
+      alternateLocale: locale === "ar" ? ["en_US"] : ["ar_EG"],
       siteName: "EGGameDB",
     },
     twitter: { card: "summary_large_image" },

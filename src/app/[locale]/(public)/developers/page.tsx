@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge } from "@/components/ui/Badge";
 import type { Profile } from "@/types";
+import { buildAlternates } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +16,8 @@ type DeveloperRow = Profile & { games?: Array<{ count: number }> };
 
 export async function generateMetadata({ params }: DevelopersPageProps) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "nav" });
-  return { title: t("developers") };
+  const t = await getTranslations({ locale, namespace: "seo" });
+  return { title: t("developers_title"), description: t("developers_description"), alternates: buildAlternates(locale, "/developers") };
 }
 
 export default async function DevelopersPage({ params }: DevelopersPageProps) {

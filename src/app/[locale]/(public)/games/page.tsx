@@ -7,6 +7,7 @@ import { SpotlightBanner } from "@/components/games/SpotlightBanner";
 import { DemoNotice } from "@/components/games/DemoNotice";
 import { DEMO_GAMES, queryDemoGames } from "@/lib/demo-games";
 import type { Game, GameFilters } from "@/types";
+import { buildAlternates, SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -19,10 +20,11 @@ const PAGE_SIZE = 20;
 
 export async function generateMetadata({ params }: GamesPageProps) {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "games" });
+  const t = await getTranslations({ locale, namespace: "seo" });
   return {
-    title: t("explore_title"),
-    description: t("explore_subtitle"),
+    title: t("games_title"),
+    description: t("games_description"),
+    alternates: buildAlternates(locale, "/games"),
   };
 }
 
@@ -130,8 +132,11 @@ export default async function GamesPage({ params, searchParams }: GamesPageProps
     !filters.genre &&
     !filters.tag;
 
+  const itemListSchema = { "@context": "https://schema.org", "@type": "ItemList", itemListElement: games.filter((game) => !game.slug.startsWith("demo-")).map((game, index) => ({ "@type": "ListItem", position: index + 1, url: `${SITE_URL}/${locale}/games/${game.slug}`, name: locale === "ar" && game.title_ar ? game.title_ar : game.title })) };
+
   return (
     <div className="pb-4">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema).replace(/</g, "\\u003c") }} />
       <div className="store-container pt-5">
         <nav aria-label="Breadcrumb" className="mb-2 flex items-center gap-1.5 text-[11px] text-eg-muted">
           <Link href="/" className="transition-colors hover:text-eg-blue">

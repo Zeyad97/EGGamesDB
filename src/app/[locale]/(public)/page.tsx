@@ -4,6 +4,7 @@ import { createPublicClient } from "@/lib/supabase/server";
 import { DEMO_GAMES } from "@/lib/demo-games";
 import { LandingExperience, type LandingGame } from "@/components/home/LandingExperience";
 import type { Game } from "@/types";
+import { buildAlternates } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -36,10 +37,12 @@ function serializeGame(game: Game, locale: string): LandingGame {
 export async function generateMetadata({ params }: LandingPageProps): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "landing" });
+  const seo = await getTranslations({ locale, namespace: "seo" });
 
   return {
-    title: t("metadata_title"),
-    description: t("metadata_description"),
+    title: { absolute: t("metadata_title") },
+    description: seo("default_description"),
+    alternates: buildAlternates(locale, "/"),
   };
 }
 
@@ -60,9 +63,8 @@ export default async function LandingPage({ params }: LandingPageProps) {
     if (error) throw error;
     games = (data ?? []) as Game[];
     if (games.length === 0) usingDemo = true;
-  } catch (e) {
+  } catch {
     usingDemo = true;
-    (globalThis as unknown as { __LAST_DB_ERROR?: string }).__LAST_DB_ERROR = String(e).slice(0, 200);
   }
 
   if (usingDemo) {
@@ -72,12 +74,5 @@ export default async function LandingPage({ params }: LandingPageProps) {
   const latest = games[0] ? serializeGame(games[0], locale) : null;
   const previews = games.slice(1, 4).map((game) => serializeGame(game, locale));
 
-  return (
-    <>
-      {(globalThis as unknown as { __LAST_DB_ERROR?: string }).__LAST_DB_ERROR && (
-        <div data-debug-error={(globalThis as unknown as { __LAST_DB_ERROR?: string }).__LAST_DB_ERROR} style={{ display: "none" }} />
-      )}
-      <LandingExperience locale={locale} latest={latest} previews={previews} usingDemo={usingDemo} />
-    </>
-  );
+  return <LandingExperience locale={locale} latest={latest} previews={previews} usingDemo={usingDemo} />;
 }

@@ -3,6 +3,7 @@ import { createPublicClient } from "@/lib/supabase/server";
 import { GameDetailClient } from "@/components/games/GameDetailClient";
 import { DEMO_GAMES, findDemoGame } from "@/lib/demo-games";
 import type { Game, GameReview } from "@/types";
+import { buildAlternates, SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -11,41 +12,44 @@ interface GamePageProps {
 }
 
 export async function generateMetadata({ params }: GamePageProps) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   try {
     const supabase = createPublicClient();
     const { data: game } = await supabase
       .from("games")
-      .select("title, short_description, header_image")
+      .select("title, title_ar, short_description, short_description_ar, header_image")
       .eq("slug", slug)
+      .eq("status", "approved")
       .single();
 
     if (game) {
+      const title = locale === "ar" && game.title_ar ? game.title_ar : game.title;
+      const description = locale === "ar" && game.short_description_ar ? game.short_description_ar : game.short_description;
+      const image = game.header_image ? [{ url: game.header_image, alt: title }] : [];
       return {
-        title: game.title,
-        description: game.short_description,
-        openGraph: {
-          title: `${game.title} | EGGameDB`,
-          description: game.short_description,
-          images: game.header_image ? [{ url: game.header_image }] : [],
-        },
+        title,
+        description,
+        alternates: buildAlternates(locale, `/games/${slug}`),
+        openGraph: { title, description, images: image },
+        twitter: { card: "summary_large_image", title, description, images: image.map((item) => item.url) },
       };
     }
   } catch {
     // Fall through to the demo lookup below.
   }
 
-  // Metadata must work for demo slugs too. Real rows always win.
   const demo = findDemoGame(slug);
   if (!demo) return {};
+  const title = locale === "ar" && demo.title_ar ? demo.title_ar : demo.title;
+  const description = locale === "ar" && demo.short_description_ar ? demo.short_description_ar : demo.short_description;
+  const image = demo.header_image ? [{ url: demo.header_image, alt: title }] : [];
   return {
-    title: demo.title,
-    description: demo.short_description,
-    openGraph: {
-      title: `${demo.title} | EGGameDB`,
-      description: demo.short_description,
-      images: demo.header_image ? [{ url: demo.header_image }] : [],
-    },
+    title,
+    description,
+    alternates: buildAlternates(locale, `/games/${slug}`),
+    robots: { index: false, follow: false },
+    openGraph: { title, description, images: image },
+    twitter: { card: "summary_large_image", title, description, images: image.map((item) => item.url) },
   };
 }
 
@@ -117,12 +121,44 @@ export default async function GamePage({ params }: GamePageProps) {
     () => {}
   );
 
+  const localizedName = locale === "ar" && game.title_ar ? game.title_ar : game.title;
+  const localizedDescription = locale === "ar" && game.short_description_ar ? game.short_description_ar : game.short_description;
+  const gameUrl = `${SITE_URL}/${locale}/games/${game.slug}`;
+  const videoGameSchema = {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    name: localizedName,
+    ...(game.title_ar ? { alternateName: game.title_ar } : {}),
+    description: localizedDescription,
+    ...(game.header_image ? { image: game.header_image } : {}),
+    url: gameUrl,
+    ...(game.genres?.length ? { genre: game.genres } : {}),
+    gamePlatform: "PC",
+    operatingSystem: [game.windows_requirements && "Windows", game.mac_requirements && "macOS", game.linux_requirements && "Linux"].filter(Boolean).join(", ") || "Windows",
+    ...(game.release_date ? { datePublished: game.release_date } : {}),
+    author: { "@type": "Organization", name: game.developer_name },
+    ...(game.publisher ? { publisher: { "@type": "Organization", name: game.publisher } } : {}),
+    countryOfOrigin: { "@type": "Country", name: "Egypt" },
+    inLanguage: locale === "ar" ? ["ar", "en"] : ["en", "ar"],
+    ...(game.is_free || game.price_usd !== null ? { offers: { "@type": "Offer", price: game.is_free ? 0 : game.price_usd, priceCurrency: "USD", availability: "https://schema.org/InStock", url: game.steam_url || gameUrl } } : {}),
+    ...(game.rating_count > 0 ? { aggregateRating: { "@type": "AggregateRating", ratingValue: game.average_rating, ratingCount: game.rating_count, bestRating: 10, worstRating: 1 } } : {}),
+    ...(game.steam_url ? { sameAs: game.steam_url } : {}),
+  };
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "EGGameDB", item: `${SITE_URL}/${locale}` },
+      { "@type": "ListItem", position: 2, name: locale === "ar" ? "الألعاب" : "Games", item: `${SITE_URL}/${locale}/games` },
+      { "@type": "ListItem", position: 3, name: localizedName, item: gameUrl },
+    ],
+  };
+
   return (
-    <GameDetailClient
-      game={game as Game}
-      reviews={reviews ?? []}
-      relatedGames={relatedGames}
-      locale={locale}
-    />
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(videoGameSchema).replace(/</g, "\\u003c") }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema).replace(/</g, "\\u003c") }} />
+      <GameDetailClient game={game as Game} reviews={reviews ?? []} relatedGames={relatedGames} locale={locale} />
+    </>
   );
 }

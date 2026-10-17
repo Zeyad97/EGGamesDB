@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildAlternates } from "@/lib/site";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 
@@ -69,8 +70,8 @@ async function getContributors(): Promise<Contributor[]> {
 
 export async function generateMetadata({ params }: AboutPageProps): Promise<Metadata> {
   const { locale } = await params;
-  const t = await getTranslations({ locale, namespace: "about" });
-  return { title: t("meta_title"), description: t("intro") };
+  const t = await getTranslations({ locale, namespace: "seo" });
+  return { title: t("about_title"), description: t("about_description"), alternates: buildAlternates(locale, "/about") };
 }
 
 export default async function AboutPage({ params }: AboutPageProps) {
