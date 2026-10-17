@@ -13,7 +13,7 @@ export function SetupBanner() {
           <span className="font-bold text-amber-400">Setup required:</span>{" "}
           Add your Supabase credentials to{" "}
           <code className="bg-black/30 px-1.5 py-0.5 rounded text-amber-300 font-mono text-xs">.env.local</code>{" "}
-          — the UI is fully rendered, but auth and data features won&apos;t work yet.{" "}
+          The UI is fully rendered, but auth and data features won&apos;t work yet.{" "}
           <a
             href="https://supabase.com"
             target="_blank"

@@ -6,7 +6,7 @@ interface ProfilePageProps {
   params: Promise<{ locale: string }>;
 }
 
-export const metadata = { title: "My Profile — EGGameDB" };
+export const metadata = { title: "My Profile | EGGameDB" };
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { locale } = await params;

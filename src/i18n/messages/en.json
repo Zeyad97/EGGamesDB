@@ -1,6 +1,6 @@
 {
   "seo": {
-    "default_title": "EGGameDB — Egyptian Games Database | Games Made in Egypt",
+    "default_title": "EGGameDB: Egyptian Games Database | Games Made in Egypt",
     "default_description": "Discover Egyptian games, games made in Egypt, and indie games by Egyptian developers. Browse a curated database of games and studios from Egypt.",
     "store_title": "Egyptian Games Store",
     "store_description": "Browse Egyptian games and indie games made in Egypt. Discover new releases, featured games, ratings, and Steam store pages from Egyptian developers.",
@@ -52,7 +52,7 @@
     "search_no_results": "No games found",
     "discover": "Discover",
     "account": "Account",
-    "footer_description": "A living index of games made in Egypt — built to help players discover new worlds and help local studios be seen."
+    "footer_description": "A living index of games made in Egypt: built to help players discover new worlds and help local studios be seen."
   },
   "home": {
     "hero_title": "Egyptian Games",
@@ -74,7 +74,7 @@
     "stats_countries": "Countries",
     "hero_eyebrow": "The Egyptian game index",
     "hero_kicker": "Find your next world",
-    "hero_body": "A curated storefront for games made by Egyptian creators — from first demos to worlds ready for your wishlist.",
+    "hero_body": "A curated storefront for games made by Egyptian creators: from first demos to worlds ready for your wishlist.",
     "hero_search": "Search the catalog",
     "view_all": "View all",
     "browse_catalog": "Browse the catalog",
@@ -94,19 +94,19 @@
     "browse_genre": "Browse by genre",
     "spotlight": "Featured",
     "view_store_page": "View store page",
-    "empty_home": "No approved games yet — approved submissions appear here.",
+    "empty_home": "No approved games yet: approved submissions appear here.",
     "empty_home_hint": "Developers can submit a game from the dashboard.",
     "empty_shelf": "Nothing here yet."
   },
   "landing": {
-    "metadata_title": "EGGameDB — Egyptian games in one place",
+    "metadata_title": "EGGameDB: Egyptian games in one place",
     "metadata_description": "A brief look at the latest games made by Egyptian developers before entering the EGGameDB store.",
     "latest_label": "Latest from the catalog",
     "demo_label": "Preview catalog",
     "enter": "Enter EGGameDB",
     "previews_heading": "More from Egyptian game makers",
     "previews_note": "A quick look before you enter the store.",
-    "persuasive_line": "Discover Egyptian indie games and games made in Egypt — find your next world worth your time.",
+    "persuasive_line": "Discover Egyptian indie games and games made in Egypt: find your next world worth your time.",
     "entry_aria": "Enter the EGGameDB store",
     "progress_label": "Featured media",
     "progress_item": "Image {current} of {total}",
@@ -202,8 +202,8 @@
     "play_slideshow": "Play slideshow"
   },
   "demo": {
-    "notice": "Demo catalog — sample listings are shown while the database is empty. Real approved games replace them automatically.",
-    "reviews_disabled": "Reviews and reports are disabled for demo listings — this is a sample entry, not a database record."
+    "notice": "Demo catalog: sample listings are shown while the database is empty. Real approved games replace them automatically.",
+    "reviews_disabled": "Reviews and reports are disabled for demo listings: this is a sample entry, not a database record."
   },
   "auth": {
     "login": "Login",
@@ -416,21 +416,24 @@
   "developers": {
     "title": "Egyptian Developers",
     "subtitle": "Studios and creators publishing games made in Egypt.",
-    "games_count": "{count} games",
+    "games_count": "{count, plural, =1 {1 game} other {# games}}",
     "empty": "No developer profiles yet.",
     "member_since": "Member since {date}",
     "views": "Views",
     "ratings": "Ratings",
     "no_games": "No approved games yet.",
     "all_developers": "All developers",
-    "website": "Website"
+    "website": "Website",
+    "studios_title": "Studios",
+    "contributors_title": "Contributors",
+    "contributor_profile": "Contributor profile: {name}"
   },
   "about": {
     "meta_title": "About",
     "title": "About EGGameDB",
     "intro": "EGGameDB is the ultimate database for Egyptian-made games. We bring together players who want to discover Egyptian games and developers who want to showcase their work to the world across Steam, Itch.io, iOS, Android, and Epic.",
     "mission_title": "Our Mission",
-    "mission_body": "Egypt has a rich and growing game development scene, with talented developers creating incredible experiences on Steam, Itch.io, and mobile platforms. Yet, these games often go unnoticed. EGGameDB exists to change that — acting as a Wikipedia, Steam, and IGDB all-in-one, specifically for Egyptian games.",
+    "mission_body": "Egypt has a rich and growing game development scene, with talented developers creating incredible experiences on Steam, Itch.io, and mobile platforms. Yet, these games often go unnoticed. EGGameDB exists to change that: acting as a Wikipedia, Steam, and IGDB all-in-one, specifically for Egyptian games.",
     "values_title": "Our Values",
     "values": {
       "gaming_first": {
@@ -460,7 +463,7 @@
     },
     "stack_title": "Built With",
     "creator_title": "Creator",
-    "creator_body": "EGGameDB was founded and built by <link>ZYAD</link> — a developer passionate about the Egyptian gaming scene. The project is open-source and community-driven. Everyone is welcome to contribute.",
+    "creator_body": "EGGameDB was founded and built by <link>ZYAD</link>: a developer passionate about the Egyptian gaming scene. The project is open-source and community-driven. Everyone is welcome to contribute.",
     "license": "EGGameDB is licensed under the MIT License. Contributions are welcome on <github>GitHub</github>.",
     "hall_eyebrow": "Open source record",
     "hall_title": "Hall of Fame",
@@ -470,7 +473,12 @@
     "contribute": "Contribute on GitHub",
     "contribute_body": "Browse the source, improve the catalog, or help shape the next release.",
     "update_note": "Contributor commits update automatically after the cache refresh.",
-    "founder": "Founder"
+    "founder": "Founder",
+    "hall_summary": "{contributors, plural, one {# contributor} other {# contributors}} · {contributions, plural, one {# contribution} other {# contributions}}",
+    "join_title": "How to join the Hall of Fame",
+    "join_step_one": "Fork the repository",
+    "join_step_two": "Make a useful contribution",
+    "join_step_three": "Your merged PR appears here automatically"
   },
   "contact": {
     "meta_title": "Contact",

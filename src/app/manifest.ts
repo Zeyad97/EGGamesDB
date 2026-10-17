@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "EGGameDB — Egyptian Games Database",
+    name: "EGGameDB: Egyptian Games Database",
     short_name: "EGGameDB",
     description: "Discover games made in Egypt and Egyptian indie games.",
     start_url: "/en",

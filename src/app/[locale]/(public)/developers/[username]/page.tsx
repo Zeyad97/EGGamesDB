@@ -4,7 +4,6 @@ import { AtSign, Code2, Globe } from "lucide-react";
 import { createPublicClient } from "@/lib/supabase/server";
 import { Link } from "@/i18n/navigation";
 import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { GameCard } from "@/components/games/GameCard";
 import { EgyptFlag } from "@/components/layout/Brand";
 import { formatDate, formatNumber } from "@/lib/utils";
@@ -22,8 +21,9 @@ export async function generateMetadata({ params }: DeveloperPageProps) {
   const t = await getTranslations({ locale, namespace: "seo" });
   let name = username;
   try {
-    const { data } = await createPublicClient().from("profiles").select("display_name, username").eq("username", username).single();
-    name = data?.display_name || data?.username || username;
+    const { data } = await createPublicClient().from("profiles").select("display_name, username, role").eq("username", username).single();
+    if (!data || data.role === "admin" || data.role === "super_admin") return { robots: { index: false, follow: false } };
+    name = data.display_name || data.username || username;
   } catch {}
   return { title: t("developer_title", { name }), description: t("developer_description", { name }), alternates: buildAlternates(locale, `/developers/${username}`) };
 }
@@ -62,7 +62,7 @@ export default async function DeveloperPage({ params }: DeveloperPageProps) {
     profile = null;
   }
 
-  if (!profile) notFound();
+  if (!profile || profile.role === "admin" || profile.role === "super_admin") notFound();
   const totalViews = gameList.reduce((sum, game) => sum + (game.view_count || 0), 0);
   const totalRatings = gameList.reduce((sum, game) => sum + (game.rating_count || 0), 0);
   const name = profile.display_name || profile.username;
@@ -102,9 +102,6 @@ export default async function DeveloperPage({ params }: DeveloperPageProps) {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-lg font-semibold text-eg-heading">{name}</h1>
-              <Badge variant={profile.role.includes("admin") ? "green" : "outline"}>
-                {profile.role.replace("_", " ")}
-              </Badge>
               <span className="inline-flex items-center gap-1.5 text-[11px] text-eg-gold">
                 <EgyptFlag />
                 {tc("made_in_egypt")}
