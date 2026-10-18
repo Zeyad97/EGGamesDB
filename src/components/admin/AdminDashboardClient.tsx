@@ -13,7 +13,10 @@ import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { formatDate } from "@/lib/utils";
 import { usePrefersReducedMotion } from "@/lib/hooks/useCarousel";
+import { StudiosAdminPanel } from "@/components/admin/StudiosAdminPanel";
+import type { StudioRow } from "@/lib/validators/studio";
 import {
+  Building2,
   LayoutDashboard,
   Gamepad2,
   Users,
@@ -45,9 +48,13 @@ interface AdminDashboardClientProps {
   isSuperAdmin: boolean;
   currentUserId: string;
   locale: string;
+  studios: StudioRow[];
+  studiosTableMissing: boolean;
+  studioGameCounts: Record<string, number>;
+  studioSuggestions: string[];
 }
 
-type AdminTab = "overview" | "games" | "users" | "messages" | "reviews" | "applications";
+type AdminTab = "overview" | "games" | "users" | "messages" | "reviews" | "applications" | "studios";
 
 const statCards = (stats: AdminStats, t: (key: string) => string) => [
   { icon: Gamepad2, label: t("total_games"), value: stats.total_games },
@@ -70,6 +77,10 @@ export function AdminDashboardClient({
   isSuperAdmin,
   currentUserId,
   locale,
+  studios: initialStudios,
+  studiosTableMissing,
+  studioGameCounts,
+  studioSuggestions,
 }: AdminDashboardClientProps) {
   const t = useTranslations("admin");
   const supabase = createClient();
@@ -227,6 +238,7 @@ export function AdminDashboardClient({
     { key: "reviews" as const, icon: MessageSquare, label: t("tabs.reviews", { count: stats.total_reviews }) },
     { key: "messages" as const, icon: Mail, label: t("tabs.messages", { count: messages.length }) },
     { key: "users" as const, icon: Users, label: t("tabs.users") },
+    { key: "studios" as const, icon: Building2, label: t("tabs.studios", { count: studiosTableMissing ? 0 : initialStudios.length }) },
   ];
 
   const entryMotion = prefersReducedMotion ? { initial: false } : { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 } };
@@ -387,6 +399,16 @@ export function AdminDashboardClient({
                 </div>
               </section>
             </div>
+          )}
+
+          {activeTab === "studios" && (
+            <StudiosAdminPanel
+              initialStudios={initialStudios}
+              tableMissing={studiosTableMissing}
+              initialGameCounts={studioGameCounts}
+              initialSuggestions={studioSuggestions}
+              locale={locale}
+            />
           )}
 
           {activeTab === "applications" && <section className="border border-eg-border bg-eg-card p-4 sm:p-5"><p className="text-[11px] uppercase tracking-[0.14em] text-eg-muted">{t("priority_label")}</p><h2 className="mt-1 font-bold text-eg-heading">{t("applications_title")}</h2><p className="mt-1 text-xs text-eg-muted">{t("applications_desc")}</p>{applications.length === 0 ? <p className="py-8 text-center text-sm text-eg-muted">{t("no_applications")}</p> : <div className="mt-4 divide-y divide-eg-border">{applications.map((dev) => <div key={dev.id} className="flex flex-wrap items-center gap-3 py-3 first:pt-0"><Avatar src={dev.avatar_url} name={dev.display_name || dev.username} size="sm" /><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-eg-heading">{dev.display_name || dev.username}</p><p className="text-xs text-eg-muted">@{dev.username} · {t("applied", { date: formatDate(dev.created_at, locale) })}</p></div><div className="flex gap-2"><Button size="sm" variant="success" loading={processing === `dev-${dev.id}`} onClick={() => handleApproveDeveloper(dev.id)}><CheckCircle size={14} aria-hidden="true" />{t("approve")}</Button><Button size="sm" variant="danger" loading={processing === `dev-${dev.id}`} onClick={() => handleRejectDeveloper(dev.id)}><XCircle size={14} aria-hidden="true" />{t("reject")}</Button></div></div>)}</div>}</section>}

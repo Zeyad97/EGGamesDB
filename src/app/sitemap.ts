@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { createPublicClient } from "@/lib/supabase/server";
 import { SITE_URL } from "@/lib/site";
-import { slugify } from "@/lib/utils";
+import { loadStudioCatalog } from "@/lib/studios";
 
 export const revalidate = 3600;
 const locales = ["en", "ar"] as const;
@@ -21,9 +21,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     const client = createPublicClient();
     const { data: games } = await client.from("games").select("slug, updated_at, developer_id, developer_name").eq("status", "approved").not("slug", "like", "demo-%");
     const approved = games ?? [];
-    const studioSlugs = [...new Set(approved.map((game) => slugify(game.developer_name ?? "")).filter(Boolean))];
     const gamePages = approved.filter((game) => game.slug && !game.slug.startsWith("demo-")).flatMap((game) => entry(`/games/${game.slug}`, game.updated_at));
-    const studioPages = studioSlugs.flatMap((slug) => entry(`/developers/studio/${slug}`));
+    // Registered studios (public.studios) plus studios that only exist in approved games.
+    // Demo games are excluded so demo studios never reach the sitemap.
+    const { studios } = await loadStudioCatalog({ demoFallback: false });
+    const studioPages = studios.flatMap((studio) => entry(`/developers/studio/${studio.slug}`));
     const developerIds = [...new Set(approved.map((game) => game.developer_id).filter(Boolean))];
     let contributorPages: SitemapRow[] = [];
     if (developerIds.length) {

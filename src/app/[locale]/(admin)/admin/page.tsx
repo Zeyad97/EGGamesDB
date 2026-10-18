@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { AdminDashboardClient } from "@/components/admin/AdminDashboardClient";
 import { redirect } from "next/navigation";
+import { studioKey, type StudioRow } from "@/lib/validators/studio";
 
 interface AdminPageProps {
   params: Promise<{ locale: string }>;
@@ -46,8 +47,33 @@ export default async function AdminPage({ params }: AdminPageProps) {
     supabase.from("game_reviews").select("*, profiles!game_reviews_user_id_fkey(username, display_name), games!game_reviews_game_id_fkey(title, slug)").order("created_at", { ascending: false }).limit(50),
   ]);
 
+  // Studios (migration 008). A missing table is reported as a notice in the panel.
+  const { data: studioRows, error: studioError } = await supabase.from("studios").select("*").order("name");
+  const { data: approvedDevelopers } = await supabase.from("games").select("developer_name").eq("status", "approved");
+  const registeredKeys = new Set(((studioRows ?? []) as StudioRow[]).map((row) => studioKey(row.name)));
+  const studioGameCounts: Record<string, number> = {};
+  const unregistered = new Map<string, { name: string; count: number }>();
+  for (const game of (approvedDevelopers ?? []) as { developer_name: string | null }[]) {
+    const name = game.developer_name?.trim();
+    if (!name) continue;
+    const key = studioKey(name);
+    studioGameCounts[key] = (studioGameCounts[key] ?? 0) + 1;
+    if (!registeredKeys.has(key)) {
+      const entry = unregistered.get(key) ?? { name, count: 0 };
+      entry.count += 1;
+      unregistered.set(key, entry);
+    }
+  }
+  const studioSuggestions = [...unregistered.values()]
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+    .map((entry) => entry.name);
+
   return (
     <AdminDashboardClient
+      studios={(studioRows ?? []) as StudioRow[]}
+      studiosTableMissing={!!studioError}
+      studioGameCounts={studioGameCounts}
+      studioSuggestions={studioSuggestions}
       stats={{
         total_games: totalGames ?? 0,
         pending_games: pendingGames ?? 0,
