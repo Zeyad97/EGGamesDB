@@ -1,33 +1,33 @@
 import { z } from "zod";
 
 export const registerSchema = z.object({
-  email: z.string().email("Invalid email address"),
+  email: z.string().email("email_invalid"),
   password: z
     .string()
-    .min(8, "At least 8 characters")
-    .regex(/[A-Z]/, "One uppercase letter required")
-    .regex(/[0-9]/, "One number required"),
+    .min(8, "password_min")
+    .regex(/[A-Z]/, "password_uppercase")
+    .regex(/[0-9]/, "password_number"),
   username: z
     .string()
-    .min(3, "At least 3 characters")
-    .max(30, "Max 30 characters")
-    .regex(/^[a-zA-Z0-9_-]+$/, "Only letters, numbers, _ and -"),
-  display_name: z.string().min(1).max(60).optional(),
+    .min(3, "username_min")
+    .max(30, "username_max")
+    .regex(/^[a-zA-Z0-9_-]+$/, "username_format"),
+  display_name: z.string().min(1, "display_name_required").max(60, "display_name_max").optional(),
   // Stores the message key; the register form translates it.
   account_type: z.enum(["studio", "player"], { error: "account_type_required" }),
 });
 
 export const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(1, "Password required"),
+  email: z.string().email("email_invalid"),
+  password: z.string().min(1, "password_required"),
 });
 
 export const profileUpdateSchema = z.object({
-  display_name: z.string().max(60).optional(),
-  bio: z.string().max(500).optional(),
-  website: z.string().url().optional().or(z.literal("")),
-  twitter: z.string().max(50).optional(),
-  github: z.string().max(50).optional(),
+  display_name: z.string().max(60, "display_name_max").optional(),
+  bio: z.string().max(500, "bio_max").optional(),
+  website: z.string().url("website_invalid").optional().or(z.literal("")),
+  twitter: z.string().max(50, "twitter_max").optional(),
+  github: z.string().max(50, "github_max").optional(),
 });
 
 export type RegisterInput = z.infer<typeof registerSchema>;

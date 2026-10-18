@@ -54,6 +54,9 @@ export function PlayerProfileClient({
   locale,
 }: PlayerProfileClientProps) {
   const tp = useTranslations("profile");
+  const tv = useTranslations("validation");
+  const validationError = (message?: string) =>
+    message && tv.has(message) ? tv(message as never) : message;
   const ta = useTranslations("account");
   const tw = useTranslations("wishlist");
   const router = useRouter();
@@ -277,17 +280,17 @@ export function PlayerProfileClient({
                 <div className="border-b border-eg-border pb-5">
                   <p className="mb-3 text-xs font-semibold text-eg-text-sub">{tp("identity_group")}</p>
                   <div className="space-y-4">
-                    <Input label={tp("display_name")} error={errors.display_name?.message} {...register("display_name")} />
-                    <Textarea label={tp("bio")} rows={3} error={errors.bio?.message} {...register("bio")} />
+                    <Input label={tp("display_name")} error={validationError(errors.display_name?.message)} {...register("display_name")} />
+                    <Textarea label={tp("bio")} rows={3} error={validationError(errors.bio?.message)} {...register("bio")} />
                   </div>
                 </div>
                 <div className="border-b border-eg-border pb-5">
                   <p className="mb-3 text-xs font-semibold text-eg-text-sub">{tp("links_group")}</p>
                   <div className="space-y-4">
-                    <Input label={tp("website")} type="url" placeholder="https://..." error={errors.website?.message} {...register("website")} />
+                    <Input label={tp("website")} type="url" placeholder="https://..." error={validationError(errors.website?.message)} {...register("website")} />
                     <div className="grid gap-4 sm:grid-cols-2">
-                      <Input label={tp("twitter")} placeholder={tp("twitter_placeholder")} {...register("twitter")} />
-                      <Input label={tp("github")} {...register("github")} />
+                      <Input label={tp("twitter")} placeholder={tp("twitter_placeholder")} error={validationError(errors.twitter?.message)} {...register("twitter")} />
+                      <Input label={tp("github")} error={validationError(errors.github?.message)} {...register("github")} />
                     </div>
                   </div>
                 </div>

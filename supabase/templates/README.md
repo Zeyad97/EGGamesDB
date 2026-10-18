@@ -21,9 +21,10 @@ The templates use Supabase's `{{ .ConfirmationURL }}`, `{{ .Token }}`, `{{ .Emai
 2. Set **Site URL** to `https://www.eggamedb.com`.
 3. Add these **Redirect URLs**:
    - `https://www.eggamedb.com/**`
+   - `https://www.eggamedb.com/api/auth/callback`
    - `http://localhost:3000/**`
 
-The register page currently does not pass `emailRedirectTo`; Supabase therefore chooses the redirect from its configured Site URL/default redirect behavior. Set the Site URL and allowed redirect URLs above. For explicit routing later, pass `emailRedirectTo` to `auth.signUp` and point it at an implemented confirmation callback on the live domain.
+The registration flow passes `emailRedirectTo` to the implemented `/api/auth/callback` route. Keep the Site URL and allowed Redirect URLs above in sync with the deployed domain.
 
 ## Set the sender name and address
 

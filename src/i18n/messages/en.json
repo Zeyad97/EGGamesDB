@@ -216,7 +216,9 @@
     "no_account": "Don't have an account?",
     "have_account": "Already have an account?",
     "verify_email": "Check your email",
-    "verify_desc": "We sent a verification link to your email. Please check your inbox.",
+    "verify_desc": "We sent a verification link to your email. Click it to confirm your account and sign in automatically.",
+    "confirm_failed": "We couldn't confirm your email link. Please try the link again or sign in.",
+    "auth_error": "We couldn't complete that request. Please try again.",
     "login_success": "Welcome back!",
     "register_success": "Account created! Please verify your email.",
     "logout_success": "Logged out successfully",
@@ -740,6 +742,22 @@
     "account_type_switch_done": "Application sent. An admin will review it.",
     "account_type_unavailable": "Account types are not available yet. Please check back soon.",
     "error": "Something went wrong. Please try again."
+  },
+  "validation": {
+    "email_invalid": "Enter a valid email address.",
+    "password_min": "Use at least 8 characters.",
+    "password_uppercase": "Include at least one uppercase letter.",
+    "password_number": "Include at least one number.",
+    "password_required": "Enter your password.",
+    "username_min": "Use at least 3 characters.",
+    "username_max": "Use no more than 30 characters.",
+    "username_format": "Use only letters, numbers, underscores, and hyphens.",
+    "display_name_required": "Enter a display name.",
+    "display_name_max": "Use no more than 60 characters.",
+    "bio_max": "Use no more than 500 characters.",
+    "website_invalid": "Enter a valid URL.",
+    "twitter_max": "Use no more than 50 characters.",
+    "github_max": "Use no more than 50 characters."
   },
   "common": {
     "loading": "Loading...",

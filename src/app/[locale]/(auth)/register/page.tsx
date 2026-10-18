@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import toast from "react-hot-toast";
 import { AtSign, Check, Gamepad2, Lock, Mail, Rocket, User } from "lucide-react";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -29,6 +29,10 @@ const ACCOUNT_OPTIONS = [
 
 export default function RegisterPage() {
   const t = useTranslations("auth");
+  const tv = useTranslations("validation");
+  const locale = useLocale();
+  const validationError = (message?: string) =>
+    message && tv.has(message) ? tv(message as never) : message;
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
@@ -45,6 +49,7 @@ export default function RegisterPage() {
       email: data.email,
       password: data.password,
       options: {
+        emailRedirectTo: `${window.location.origin}/api/auth/callback?locale=${locale}&next=/profile`,
         data: {
           username: data.username,
           display_name: data.display_name || data.username,
@@ -56,7 +61,7 @@ export default function RegisterPage() {
     setLoading(false);
 
     if (error) {
-      toast.error(error.message);
+      toast.error(t("auth_error"));
       return;
     }
 
@@ -123,14 +128,14 @@ export default function RegisterPage() {
                 label={t("username")}
                 placeholder={t("username_placeholder")}
                 prefix={<AtSign size={14} />}
-                error={errors.username?.message}
+                error={validationError(errors.username?.message)}
                 {...register("username")}
               />
               <Input
                 label={t("display_name")}
                 placeholder={t("display_name_placeholder")}
                 prefix={<User size={14} />}
-                error={errors.display_name?.message}
+                error={validationError(errors.display_name?.message)}
                 {...register("display_name")}
               />
             </div>
@@ -140,7 +145,7 @@ export default function RegisterPage() {
               type="email"
               placeholder={t("email_placeholder")}
               prefix={<Mail size={14} />}
-              error={errors.email?.message}
+              error={validationError(errors.email?.message)}
               {...register("email")}
             />
             <Input
@@ -148,7 +153,7 @@ export default function RegisterPage() {
               type="password"
               placeholder={t("password_hint")}
               prefix={<Lock size={14} />}
-              error={errors.password?.message}
+              error={validationError(errors.password?.message)}
               {...register("password")}
             />
 
