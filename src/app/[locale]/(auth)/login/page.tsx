@@ -76,9 +76,9 @@ export default function LoginPage() {
             />
 
             <div className="flex justify-end">
-              <a href="#" className="text-[11px] text-eg-blue transition-colors hover:text-white">
+              <Link href="/forgot-password" className="text-[11px] text-eg-blue transition-colors hover:text-white">
                 {t("forgot_password")}
-              </a>
+              </Link>
             </div>
 
             <Button type="submit" loading={loading} className="w-full">

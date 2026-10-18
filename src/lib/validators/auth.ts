@@ -22,6 +22,20 @@ export const loginSchema = z.object({
   password: z.string().min(1, "password_required"),
 });
 
+export const resetPasswordSchema = z
+  .object({
+    password: z
+      .string()
+      .min(8, "password_min")
+      .regex(/[A-Z]/, "password_uppercase")
+      .regex(/[0-9]/, "password_number"),
+    confirmPassword: z.string().min(1, "password_confirm_required"),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "password_mismatch",
+  });
+
 export const profileUpdateSchema = z.object({
   display_name: z.string().max(60, "display_name_max").optional(),
   bio: z.string().max(500, "bio_max").optional(),
@@ -32,4 +46,5 @@ export const profileUpdateSchema = z.object({
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;

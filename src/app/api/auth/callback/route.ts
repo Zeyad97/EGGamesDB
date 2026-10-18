@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
-const ALLOWED_NEXT_PATHS = new Set(["/profile", "/dashboard", "/store", "/"]);
+const ALLOWED_NEXT_PATHS = new Set(["/profile", "/dashboard", "/store", "/reset-password", "/"]);
 
 function getLocale(value: string | null): "en" | "ar" {
   return value === "ar" ? "ar" : value === "en" ? "en" : "en";
@@ -28,21 +28,24 @@ function redirectTo(request: NextRequest, pathname: string) {
 export async function GET(request: NextRequest) {
   const locale = getLocale(request.nextUrl.searchParams.get("locale"));
   const code = request.nextUrl.searchParams.get("code");
+  const nextPath = getNextPath(request.nextUrl.searchParams.get("next"));
+  const failurePath = nextPath === "/reset-password"
+    ? `/${locale}/forgot-password?error=link_expired`
+    : `/${locale}/login?error=confirm_failed`;
 
   if (!code) {
-    return redirectTo(request, `/${locale}/login?error=confirm_failed`);
+    return redirectTo(request, failurePath);
   }
 
   try {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
-      return redirectTo(request, `/${locale}/login?error=confirm_failed`);
+      return redirectTo(request, failurePath);
     }
   } catch {
-    return redirectTo(request, `/${locale}/login?error=confirm_failed`);
+    return redirectTo(request, failurePath);
   }
 
-  const nextPath = getNextPath(request.nextUrl.searchParams.get("next"));
   return redirectTo(request, `/${locale}${nextPath}`);
 }

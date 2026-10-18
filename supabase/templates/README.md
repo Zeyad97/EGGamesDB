@@ -26,6 +26,10 @@ The templates use Supabase's `{{ .ConfirmationURL }}`, `{{ .Token }}`, `{{ .Emai
 
 The registration flow passes `emailRedirectTo` to the implemented `/api/auth/callback` route. Keep the Site URL and allowed Redirect URLs above in sync with the deployed domain.
 
+## Forgot password
+
+The forgot-password flow sends users through the PKCE callback at `/api/auth/callback`, then returns them to the password reset form. Install the **Reset password** email template from `reset-password.html` so recovery emails use the correct confirmation link.
+
 ## Set the sender name and address
 
 Configure custom SMTP in **Authentication → SMTP Settings**. For example, use Resend and set the sender to `EGGameDB <noreply@eggamedb.com>`. Verify `eggamedb.com` with Resend, then add the exact SPF, DKIM, and any DMARC DNS records Resend supplies to Porkbun's DNS management before enabling sending. Confirm the domain and sender are verified in Resend.
