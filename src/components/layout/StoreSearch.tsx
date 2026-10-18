@@ -144,7 +144,7 @@ export function StoreSearch({
         <label htmlFor="store-search" className="sr-only">
           {tc("search")}
         </label>
-        <div className="flex h-7 items-center overflow-hidden rounded-sm bg-black/30 focus-within:ring-1 focus-within:ring-eg-blue">
+        <div className="flex h-10 items-center overflow-hidden rounded-sm bg-black/30 focus-within:ring-1 focus-within:ring-eg-blue md:h-7">
           <input
             id="store-search"
             type="search"
@@ -173,12 +173,12 @@ export function StoreSearch({
             }}
             onKeyDown={handleKeyDown}
             placeholder={t("search_store")}
-            className="h-full w-full min-w-0 bg-transparent px-2.5 text-[13px] text-eg-text placeholder:text-eg-muted focus:outline-none md:w-52"
+            className="h-full w-full min-w-0 bg-transparent px-2.5 text-base text-eg-text placeholder:text-eg-muted focus:outline-none md:w-52 md:text-[13px]"
           />
           <button
             type="submit"
             aria-label={tc("search")}
-            className="flex h-7 w-8 shrink-0 items-center justify-center text-eg-text-sub transition-colors hover:bg-black/25 hover:text-eg-heading"
+            className="flex h-10 w-10 shrink-0 items-center justify-center text-eg-text-sub transition-colors hover:bg-black/25 hover:text-eg-heading md:h-7 md:w-8"
           >
             <Search size={14} aria-hidden="true" />
           </button>

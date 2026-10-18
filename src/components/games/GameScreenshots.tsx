@@ -25,7 +25,7 @@ interface GalleryItem {
 }
 
 const controlClasses =
-  "flex h-8 w-8 items-center justify-center rounded-sm border border-white/15 bg-black/65 text-white/80 transition-colors hover:border-eg-gold/70 hover:text-eg-gold";
+  "flex h-10 w-10 items-center justify-center rounded-sm border border-white/15 bg-black/65 text-white/80 transition-colors hover:border-eg-gold/70 hover:text-eg-gold sm:h-8 sm:w-8";
 
 /**
  * Product gallery: main image, always-available prev/next controls, thumbnail

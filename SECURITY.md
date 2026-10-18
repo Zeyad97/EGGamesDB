@@ -20,6 +20,7 @@ Please do not disclose vulnerabilities in public issues. Email the maintainers a
 | Admin user deletion left orphaned auth identity | Medium | Fixed in application | Super-admin-only `DELETE /api/admin/users/[id]`; database migration still needs application. |
 | Origin/CSRF and input validation | Medium | Partially mitigated | Game POST, game PATCH (`/api/games/[id]`), and admin delete enforce same-origin/allowlisted Origin; PATCH accepts only `draft`/`pending` status and never `developer_id`/`reviewed_*`/`spotlight_at`/counters/`rejection_reason` from the body. Review remaining mutation routes as added. |
 | User-generated content spam | Medium | Mitigated, pending migration | Insert rate triggers and contact field length checks are in migration. |
+| Mass account creation from one network | Medium | Mitigated, pending migration | `supabase/migrations/011_signup_ip_limit.sql` and the Before User Created hook in `supabase/hooks/README.md`: at most 2 accounts per IPv4 address or IPv6 /64, stored as one-way hashes only. Only accounts that were created hold a slot until deleted; a mistyped or abandoned sign-up holds one for 1 hour, then is released. A deterrent, not a guarantee: shared networks can be blocked and VPNs can bypass it. |
 | Secrets / session / server route access | Medium | Reviewed | `.env*` is ignored; server pages for admin/dashboard/profile perform server-side authentication. Re-audit history before any secret exposure. |
 
 ## Future-proofing checklist

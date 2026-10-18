@@ -1,10 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { motion, type Variants } from "framer-motion";
 import { ArrowUpRight, BadgeCheck, Code2, Flag, Gamepad2, GitBranch, Heart, Landmark, Users } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { usePrefersReducedMotion } from "@/lib/hooks/useCarousel";
 
 interface Contributor {
   login: string;
@@ -26,29 +24,12 @@ const valueKeys = ["gaming_first", "egyptian_pride", "quality", "open_source", "
 const valueIcons = [Gamepad2, Flag, BadgeCheck, GitBranch, Users, Heart];
 const stack = ["Next.js 16", "TypeScript", "Tailwind CSS", "Framer Motion", "Supabase", "PostgreSQL"];
 const REPOSITORY_URL = "https://github.com/Zeyad97/EGGamesDB";
-const entrance: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.62, ease: [0.22, 1, 0.36, 1] } },
-};
-
-function Reveal({ children, className = "", reducedMotion }: { children: React.ReactNode; className?: string; reducedMotion: boolean }) {
-  return (
-    <motion.section
-      className={className}
-      variants={entrance}
-      initial={reducedMotion ? false : "hidden"}
-      animate={reducedMotion ? { opacity: 1, y: 0, transition: { duration: 0 } } : undefined}
-      whileInView={reducedMotion ? undefined : "visible"}
-      viewport={{ once: true, amount: 0.12 }}
-    >
-      {children}
-    </motion.section>
-  );
+function Reveal({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <section className={className}>{children}</section>;
 }
 
 export function AboutExperience({ locale, contributors, gameImages, stats }: AboutExperienceProps) {
   const t = useTranslations("about");
-  const reducedMotion = usePrefersReducedMotion();
   const founder = contributors.find((item) => item.login.toLowerCase() === "zyad97") ?? contributors[0];
   const others = contributors.filter((item) => item.login.toLowerCase() !== founder.login.toLowerCase());
   const direction = locale === "ar" ? "rtl" : "ltr";
@@ -62,7 +43,7 @@ export function AboutExperience({ locale, contributors, gameImages, stats }: Abo
   return (
     <main className="overflow-hidden bg-eg-darker" dir={direction}>
       <header className="relative isolate min-h-[620px] overflow-hidden border-b border-eg-gold/30 sm:min-h-[660px] lg:min-h-[700px]">
-        {gameImages.slice(0, 3).map((source, index) => (
+        {gameImages.slice(0, 1).map((source, index) => (
           <div key={source} className={`absolute inset-y-0 ${index === 0 ? "start-0 w-full" : "hidden"}`}>
             <Image src={source} alt="" fill priority sizes="100vw" className="object-cover object-center opacity-40" />
           </div>
@@ -71,14 +52,14 @@ export function AboutExperience({ locale, contributors, gameImages, stats }: Abo
         <div aria-hidden="true" className="absolute inset-0 bg-[linear-gradient(0deg,#12100d_0%,transparent_54%)]" />
         <div aria-hidden="true" className="absolute inset-x-0 top-0 flex h-1"><span className="w-[68%] bg-eg-red" /><span className="flex-1 bg-eg-gold" /></div>
         <div className="relative mx-auto flex min-h-[620px] max-w-[1600px] flex-col justify-end px-5 pb-14 pt-32 sm:min-h-[660px] sm:px-10 sm:pb-20 lg:min-h-[700px] lg:px-16">
-          <motion.div initial={reducedMotion ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: reducedMotion ? 0 : 0.65 }}>
-            <p className="text-[10px] font-bold uppercase tracking-[.28em] text-eg-gold sm:text-xs">EGGameDB <span className="mx-2 text-eg-red">/</span>{t("creator_title")}</p>
-            <h1 className="mt-6 max-w-[12ch] text-[clamp(3.2rem,9vw,8.2rem)] font-semibold leading-[.91] tracking-[-.065em] text-eg-heading">{t("hero_title")}</h1>
-            <p className="mt-7 max-w-2xl text-sm leading-7 text-eg-text sm:text-base sm:leading-8">{t("intro")}</p>
-            <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" className="mt-8 inline-flex min-h-12 items-center gap-5 border border-eg-gold bg-eg-gold px-5 text-sm font-bold text-eg-darker transition-colors hover:bg-eg-accent-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-eg-heading">
+          <div>
+            <p className="about-hero-enter about-hero-enter--1 text-[10px] font-bold uppercase tracking-[.28em] text-eg-gold sm:text-xs">EGGameDB <span className="mx-2 text-eg-red">/</span>{t("creator_title")}</p>
+            <h1 className="about-hero-enter about-hero-enter--2 mt-6 max-w-[12ch] text-[clamp(3.2rem,9vw,8.2rem)] font-semibold leading-[.91] tracking-[-.065em] text-eg-heading">{t("hero_title")}</h1>
+            <p className="about-hero-enter about-hero-enter--3 mt-7 max-w-2xl text-sm leading-7 text-eg-text sm:text-base sm:leading-8">{t("intro")}</p>
+            <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" className="about-hero-enter about-hero-enter--4 mt-8 inline-flex min-h-12 items-center gap-5 border border-eg-gold bg-eg-gold px-5 text-sm font-bold text-eg-darker transition-colors hover:bg-eg-accent-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-eg-heading">
               {t("hero_cta")}<ArrowUpRight size={17} aria-hidden="true" className="rtl:rotate-[-90deg]" />
             </a>
-          </motion.div>
+          </div>
           <div aria-hidden="true" className="mt-12 flex items-center gap-3">
             <span className="h-[3px] w-14 bg-eg-red" /><span className="h-px w-24 bg-eg-gold/80" /><span className="text-[9px] font-mono tracking-[.24em] text-eg-muted">01 / 04</span>
           </div>
@@ -97,12 +78,12 @@ export function AboutExperience({ locale, contributors, gameImages, stats }: Abo
       </section>
 
       <div className="mx-auto max-w-[1360px] px-5 sm:px-10 lg:px-16">
-        <Reveal reducedMotion={reducedMotion} className="grid gap-8 border-b border-eg-border py-16 sm:py-20 lg:grid-cols-[.65fr_1.35fr] lg:gap-14 lg:py-28">
+        <Reveal className="grid gap-8 border-b border-eg-border py-16 sm:py-20 lg:grid-cols-[.65fr_1.35fr] lg:gap-14 lg:py-28">
           <div><p className="text-[10px] font-bold uppercase tracking-[.24em] text-eg-gold">01 <span className="mx-2 text-eg-red">/</span>{t("mission_kicker")}</p><h2 className="mt-3 text-sm font-bold uppercase tracking-[.15em] text-eg-text-sub">{t("mission_title")}</h2></div>
           <div><p className="max-w-5xl text-[clamp(1.8rem,4.3vw,4.1rem)] font-medium leading-[1.18] tracking-[-.045em] text-eg-heading">{t("mission_statement")}</p><p className="mt-7 max-w-3xl text-sm leading-7 text-eg-text-sub">{t("mission_body")}</p></div>
         </Reveal>
 
-        <Reveal reducedMotion={reducedMotion} className="border-b border-eg-border py-16 sm:py-20">
+        <Reveal className="border-b border-eg-border py-16 sm:py-20">
           <div className="mb-9 flex items-end justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[.24em] text-eg-gold">02 <span className="mx-2 text-eg-red">/</span>{t("values_kicker")}</p><h2 className="mt-3 text-3xl font-semibold tracking-tight text-eg-heading sm:text-4xl">{t("values_title")}</h2></div><span aria-hidden="true" className="hidden h-px flex-1 bg-eg-border sm:block" /></div>
           <div className="grid gap-px border border-eg-border bg-eg-border sm:grid-cols-2 lg:grid-cols-3">
             {valueKeys.map((key, index) => {
@@ -112,12 +93,12 @@ export function AboutExperience({ locale, contributors, gameImages, stats }: Abo
           </div>
         </Reveal>
 
-        <Reveal reducedMotion={reducedMotion} className="flex flex-col gap-6 border-b border-eg-border py-12 sm:flex-row sm:items-center sm:justify-between sm:py-14">
+        <Reveal className="flex flex-col gap-6 border-b border-eg-border py-12 sm:flex-row sm:items-center sm:justify-between sm:py-14">
           <div><p className="text-[10px] font-bold uppercase tracking-[.24em] text-eg-gold">03 <span className="mx-2 text-eg-red">/</span>{t("stack_kicker")}</p><h2 className="mt-2 text-xl font-semibold text-eg-heading">{t("stack_title")}</h2></div>
           <div className="flex max-w-3xl flex-wrap gap-2">{stack.map((item) => <span key={item} className="border border-eg-border-strong px-3 py-2 text-xs font-medium text-eg-text-sub">{item}</span>)}</div>
         </Reveal>
 
-        <Reveal reducedMotion={reducedMotion} className="py-16 sm:py-24" >
+        <Reveal className="py-16 sm:py-24" >
           <div className="grid gap-8 lg:grid-cols-[.75fr_1.25fr] lg:gap-14">
             <div className="lg:sticky lg:top-24 lg:self-start"><p className="text-[10px] font-bold uppercase tracking-[.24em] text-eg-gold">04 <span className="mx-2 text-eg-red">/</span>{t("hall_eyebrow")}</p><h2 className="mt-3 text-4xl font-semibold tracking-[-.04em] text-eg-heading sm:text-5xl">{t("hall_title")}</h2><p className="mt-5 max-w-md text-sm leading-7 text-eg-text-sub">{t("hall_body")}</p><p className="mt-6 border-s-2 border-eg-red ps-4 text-xs leading-6 text-eg-muted">{t("hall_summary", { contributors: stats.contributors, contributions: stats.contributions })}</p></div>
             <div className="min-w-0">
@@ -130,18 +111,18 @@ export function AboutExperience({ locale, contributors, gameImages, stats }: Abo
               </a>
               {others.length > 0 && <div className="mt-3 grid gap-px border border-eg-border bg-eg-border sm:grid-cols-2">{others.map((contributor, index) => <a key={`${contributor.id}-${contributor.login}`} href={contributor.html_url} target="_blank" rel="noopener noreferrer" aria-label={t("github_profile", { login: contributor.login })} className="group flex min-w-0 items-center gap-3 bg-eg-dark p-3 transition-colors hover:bg-eg-card sm:p-4"><span className="font-mono text-[10px] text-eg-gold">{String(index + 2).padStart(2, "0")}</span><Image src={contributor.avatar_url} alt="" width={44} height={44} className="h-11 w-11 shrink-0 rounded-sm border border-eg-border object-cover" /><span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold text-eg-heading group-hover:text-eg-gold">{contributor.login}</span><span className="mt-1 block text-[11px] text-eg-muted">{t("contributions", { count: contributor.contributions })}</span></span><ArrowUpRight size={15} aria-hidden="true" className="shrink-0 text-eg-muted" /></a>)}</div>}
               <p className="mt-3 text-[11px] leading-5 text-eg-muted">{t("update_note")}</p>
-              <div className="mt-7 border-t-2 border-eg-red bg-eg-card p-5 sm:p-7"><div className="flex items-center gap-3"><GitBranch size={18} className="text-eg-gold" aria-hidden="true"/><h3 className="text-base font-semibold text-eg-heading">{t("join_title")}</h3></div><ol className="mt-5 grid gap-4 sm:grid-cols-3">{["join_step_one", "join_step_two", "join_step_three"].map((key, index) => <li key={key} className="flex gap-3"><span className="font-mono text-xs text-eg-gold">0{index + 1}</span><span className="text-xs leading-5 text-eg-text-sub">{t(key)}</span></li>)}</ol><a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex items-center gap-2 text-xs font-bold text-eg-gold hover:text-eg-accent-hover">{t("contribute")}<ArrowUpRight size={14} aria-hidden="true" className="rtl:rotate-[-90deg]" /></a></div>
+              <div className="mt-7 border-t-2 border-eg-red bg-eg-card p-5 sm:p-7"><div className="flex items-center gap-3"><GitBranch size={18} className="text-eg-gold" aria-hidden="true"/><h3 className="text-base font-semibold text-eg-heading">{t("join_title")}</h3></div><ol className="mt-5 grid gap-4 sm:grid-cols-3">{["join_step_one", "join_step_two", "join_step_three"].map((key, index) => <li key={key} className="flex gap-3"><span className="font-mono text-xs text-eg-gold">0{index + 1}</span><span className="text-xs leading-5 text-eg-text-sub">{t(key)}</span></li>)}</ol><a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex min-h-10 items-center gap-2 text-xs font-bold text-eg-gold hover:text-eg-accent-hover sm:min-h-0">{t("contribute")}<ArrowUpRight size={14} aria-hidden="true" className="rtl:rotate-[-90deg]" /></a></div>
             </div>
           </div>
         </Reveal>
 
-        <Reveal reducedMotion={reducedMotion} className="grid gap-8 border-t border-eg-border py-12 sm:grid-cols-[.65fr_1.35fr] sm:py-16">
+        <Reveal className="grid gap-8 border-t border-eg-border py-12 sm:grid-cols-[.65fr_1.35fr] sm:py-16">
           <div><p className="text-[10px] font-bold uppercase tracking-[.24em] text-eg-gold">05 <span className="mx-2 text-eg-red">/</span>{t("creator_kicker")}</p><h2 className="mt-3 text-2xl font-semibold text-eg-heading">{t("creator_title")}</h2></div>
           <div><p className="max-w-3xl text-base leading-8 text-eg-text-sub">{t.rich("creator_body", { link: (chunks) => <a href="https://linktr.ee/zyad" target="_blank" rel="noopener noreferrer" className="font-semibold text-eg-gold underline decoration-eg-gold/40 underline-offset-4 hover:text-eg-accent-hover">{chunks}</a> })}</p><p className="mt-5 text-xs leading-6 text-eg-muted">{t.rich("license", { github: (chunks) => <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" className="text-eg-gold hover:text-eg-accent-hover">{chunks}</a> })}</p></div>
         </Reveal>
       </div>
 
-      <Reveal reducedMotion={reducedMotion} className="relative isolate overflow-hidden border-y border-eg-gold/30 bg-eg-nav">
+      <Reveal className="relative isolate overflow-hidden border-y border-eg-gold/30 bg-eg-nav">
         <div aria-hidden="true" className="absolute inset-y-0 start-0 w-2 bg-eg-red" />
         <div className="mx-auto flex max-w-[1360px] flex-col gap-8 px-6 py-14 sm:px-10 sm:py-20 lg:flex-row lg:items-end lg:justify-between lg:px-16">
           <div className="max-w-3xl"><p className="text-[10px] font-bold uppercase tracking-[.24em] text-eg-gold"><Code2 size={14} className="me-2 inline" aria-hidden="true"/>{t("cta_kicker")}</p><h2 className="mt-4 text-3xl font-semibold leading-tight tracking-[-.04em] text-eg-heading sm:text-5xl">{t("cta_title")}</h2><p className="mt-4 max-w-2xl text-sm leading-7 text-eg-text-sub">{t("cta_body")}</p></div>

@@ -25,7 +25,7 @@ interface HeroSlide {
 }
 
 const controlClasses =
-  "flex h-8 w-8 items-center justify-center rounded-sm border border-white/15 bg-black/65 text-white/80 transition-colors hover:border-eg-gold/70 hover:text-eg-gold";
+  "flex h-10 w-10 items-center justify-center rounded-sm border border-white/15 bg-black/65 text-white/80 transition-colors hover:border-eg-gold/70 hover:text-eg-gold sm:h-8 sm:w-8";
 
 /**
  * Above-the-fold storefront feature: one real game, its media as a small
@@ -202,14 +202,14 @@ export function HeroSection({ game, locale }: HeroSectionProps) {
             <p className="text-[11px] font-semibold text-eg-muted">{t("spotlight")}</p>
 
             <h2 id="storefront-feature" className="mt-1 text-xl font-semibold leading-6">
-              <Link href={`/games/${game.slug}`} className="text-eg-heading hover:text-eg-blue">
+              <Link href={`/games/${game.slug}`} className="inline-flex min-h-10 items-center text-eg-heading hover:text-eg-blue sm:min-h-0">
                 {title}
               </Link>
             </h2>
 
             <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-eg-muted">
               {developerHref ? (
-                <Link href={developerHref} className="text-eg-text-sub hover:text-eg-blue">
+                <Link href={developerHref} className="inline-flex min-h-10 items-center text-eg-text-sub hover:text-eg-blue sm:min-h-0">
                   {developer}
                 </Link>
               ) : (
@@ -224,12 +224,12 @@ export function HeroSection({ game, locale }: HeroSectionProps) {
             {(game.genres.length > 0 || game.tags.length > 0) && (
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {game.genres.slice(0, 3).map((genre) => (
-                  <Link key={genre} href={`/games?genre=${encodeURIComponent(genre)}`}>
+                  <Link key={genre} href={`/games?genre=${encodeURIComponent(genre)}`} className="inline-flex min-h-10 min-w-10 items-center sm:min-h-0 sm:min-w-0">
                     <Badge variant="outline">{genre}</Badge>
                   </Link>
                 ))}
                 {game.tags.slice(0, 3).map((tag) => (
-                  <Link key={tag} href={`/games?tag=${encodeURIComponent(tag)}`}>
+                  <Link key={tag} href={`/games?tag=${encodeURIComponent(tag)}`} className="inline-flex min-h-10 min-w-10 items-center sm:min-h-0 sm:min-w-0">
                     <Badge>{tag}</Badge>
                   </Link>
                 ))}
@@ -244,7 +244,7 @@ export function HeroSection({ game, locale }: HeroSectionProps) {
             <div className="mt-3 flex flex-wrap gap-2">
               <Link
                 href={`/games/${game.slug}`}
-                className="inline-flex h-9 items-center rounded-sm bg-eg-blue px-3.5 text-[13px] font-medium text-eg-darker transition-colors hover:bg-eg-accent-hover"
+                className="inline-flex h-9 min-h-10 items-center rounded-sm bg-eg-blue px-3.5 text-[13px] font-medium text-eg-darker transition-colors hover:bg-eg-accent-hover sm:min-h-0"
               >
                 {t("view_store_page")}
               </Link>
@@ -253,7 +253,7 @@ export function HeroSection({ game, locale }: HeroSectionProps) {
                   href={game.steam_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-sm border border-eg-border bg-eg-surface px-3.5 text-[13px] text-eg-text transition-colors hover:border-eg-border-strong hover:text-eg-heading"
+                  className="inline-flex h-9 min-h-10 items-center gap-1.5 rounded-sm border border-eg-border bg-eg-surface px-3.5 text-[13px] text-eg-text transition-colors hover:border-eg-border-strong hover:text-eg-heading sm:min-h-0"
                 >
                   {game.is_free ? tg("view_on_steam") : tg("buy_on_steam")}
                   <ExternalLink size={13} aria-hidden="true" />

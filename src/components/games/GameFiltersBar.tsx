@@ -83,7 +83,7 @@ export function GameFiltersBar({ currentFilters, totalCount, locale }: GameFilte
           onClick={() => update({ genre: undefined, page: undefined })}
           aria-pressed={!currentFilters.genre}
           className={cn(
-            "block w-full border-s ps-2 text-start text-xs transition-colors",
+            "block min-h-10 w-full border-s ps-2 text-start text-xs transition-colors lg:min-h-0",
             !currentFilters.genre
               ? "border-eg-blue text-white"
               : "border-eg-border text-eg-text-sub hover:border-eg-border-strong hover:text-white"
@@ -101,7 +101,7 @@ export function GameFiltersBar({ currentFilters, totalCount, locale }: GameFilte
               onClick={() => update({ genre: isActive ? undefined : genre, page: undefined })}
               aria-pressed={isActive}
               className={cn(
-                "block w-full border-s ps-2 text-start text-xs transition-colors",
+                "block min-h-10 w-full border-s ps-2 text-start text-xs transition-colors lg:min-h-0",
                 isActive
                   ? "border-eg-blue text-white"
                   : "border-eg-border text-eg-text-sub hover:border-eg-border-strong hover:text-white"
@@ -124,19 +124,19 @@ export function GameFiltersBar({ currentFilters, totalCount, locale }: GameFilte
             <label htmlFor="catalog-search-mobile" className="sr-only">
               {tc("search")}
             </label>
-            <div className="flex h-9 items-center border border-eg-border bg-eg-darker focus-within:border-eg-blue/70">
+            <div className="flex h-10 items-center border border-eg-border bg-eg-darker focus-within:border-eg-blue/70">
               <input
                 id="catalog-search-mobile"
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 placeholder={t("search_placeholder")}
-                className="h-full w-full min-w-0 bg-transparent px-2.5 text-[13px] text-eg-text placeholder:text-eg-muted focus:outline-none"
+                className="h-full min-h-10 w-full min-w-0 bg-transparent px-2.5 text-base text-eg-text placeholder:text-eg-muted focus:outline-none lg:min-h-0 lg:text-[13px]"
               />
               <button
                 type="submit"
                 aria-label={tc("search")}
-                className="flex h-9 w-9 shrink-0 items-center justify-center text-eg-muted transition-colors hover:text-white"
+                className="flex h-10 w-10 shrink-0 items-center justify-center text-eg-muted transition-colors hover:text-white"
               >
                 <Search size={15} aria-hidden="true" />
               </button>
@@ -195,7 +195,7 @@ export function GameFiltersBar({ currentFilters, totalCount, locale }: GameFilte
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder={t("search_placeholder")}
-              className="h-full w-full min-w-0 bg-transparent px-2.5 text-[13px] text-eg-text placeholder:text-eg-muted focus:outline-none"
+              className="h-full min-h-10 w-full min-w-0 bg-transparent px-2.5 text-base text-eg-text placeholder:text-eg-muted focus:outline-none lg:min-h-0 lg:text-[13px]"
             />
             <button
               type="submit"

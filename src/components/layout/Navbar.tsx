@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { usePrefersReducedMotion } from "@/lib/hooks/useCarousel";
 import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
@@ -42,7 +40,6 @@ export function Navbar({ locale }: { locale: string }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const accountRef = useRef<HTMLDivElement>(null);
-  const prefersReducedMotion = usePrefersReducedMotion();
 
   const otherLocale = locale === "ar" ? "en" : "ar";
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin";
@@ -113,12 +110,7 @@ export function Navbar({ locale }: { locale: string }) {
 
   if (pathname === "/") {
     return (
-      <motion.header
-        className="absolute inset-x-0 top-0 z-50 bg-transparent"
-        initial={prefersReducedMotion ? false : { opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={prefersReducedMotion ? { duration: 0 } : { duration: 0.7, delay: 0.15, ease: [0.22, 1, 0.36, 1] }}
-      >
+      <header className="landing-header-enter absolute inset-x-0 top-0 z-50 bg-transparent">
         <div className="flex h-16 items-center justify-between px-6 sm:px-10 lg:px-16">
           <span aria-label="EGGameDB">
             <Wordmark />
@@ -126,24 +118,24 @@ export function Navbar({ locale }: { locale: string }) {
           <Link
             href={pathname}
             locale={otherLocale}
-            className="rounded-sm px-2.5 py-1.5 text-[13px] text-eg-heading/90 transition-colors hover:bg-black/20 hover:text-white"
+            className="inline-flex min-h-10 items-center rounded-sm px-2.5 py-1.5 text-[13px] text-eg-heading/90 transition-colors hover:bg-black/20 hover:text-white sm:min-h-0"
             aria-label={tc("language")}
           >
             <Globe2 size={15} aria-hidden="true" className="inline-block align-[-3px]" />
             <span className="ms-1.5">{locale === "en" ? "العربية" : "English"}</span>
           </Link>
         </div>
-      </motion.header>
+      </header>
     );
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-black/50 bg-eg-header">
+    <header className="sticky top-0 z-50 border-b border-black/50 bg-eg-header pt-[env(safe-area-inset-top)]">
       {/* Global bar: brand, sections, account */}
       <div className="store-container flex h-12 items-center gap-3">
         <Link
           href="/"
-          className="shrink-0 rounded-sm"
+          className="inline-flex min-h-10 shrink-0 items-center rounded-sm"
           aria-label="EGGameDB"
           onClick={() => setMobileOpen(false)}
         >
@@ -260,7 +252,7 @@ export function Navbar({ locale }: { locale: string }) {
             aria-expanded={mobileOpen}
             aria-controls="mobile-navigation"
             aria-label={mobileOpen ? tc("close") : tc("menu")}
-            className="flex h-8 w-8 items-center justify-center rounded-sm text-eg-text-sub transition-colors hover:bg-white/[0.05] hover:text-eg-heading md:hidden"
+            className="flex h-10 w-10 items-center justify-center rounded-sm text-eg-text-sub transition-colors hover:bg-white/[0.05] hover:text-eg-heading md:hidden"
           >
             {mobileOpen ? <X size={18} /> : <Menu size={18} />}
           </button>
@@ -306,7 +298,7 @@ export function Navbar({ locale }: { locale: string }) {
                     onClick={() => setMobileOpen(false)}
                     aria-current={isActive(link.href) ? "page" : undefined}
                     className={cn(
-                      "rounded-sm border border-eg-border px-3 py-2 text-[13px]",
+                      "min-h-10 rounded-sm border border-eg-border px-3 py-2 text-[13px]",
                       isActive(link.href)
                         ? "bg-white/[0.07] text-white"
                         : "bg-eg-card text-eg-text-sub"
@@ -339,7 +331,7 @@ export function Navbar({ locale }: { locale: string }) {
                 href={pathname}
                 locale={otherLocale}
                 onClick={() => setMobileOpen(false)}
-                className="flex items-center gap-1.5 rounded-sm border border-eg-border px-2.5 py-1.5 text-[12px] text-eg-text-sub"
+                className="flex min-h-10 items-center gap-1.5 rounded-sm border border-eg-border px-2.5 py-1.5 text-[12px] text-eg-text-sub"
               >
                 <Globe2 size={14} aria-hidden="true" />
                 {locale === "en" ? "العربية" : "English"}
@@ -352,7 +344,7 @@ export function Navbar({ locale }: { locale: string }) {
                       key={`mobile-${href}`}
                       href={href}
                       onClick={() => setMobileOpen(false)}
-                      className="flex items-center gap-1.5 rounded-sm border border-eg-border px-2.5 py-1.5 text-[12px] text-eg-text-sub"
+                      className="flex min-h-10 items-center gap-1.5 rounded-sm border border-eg-border px-2.5 py-1.5 text-[12px] text-eg-text-sub"
                     >
                       <Icon size={14} aria-hidden="true" />
                       {label}
@@ -372,14 +364,14 @@ export function Navbar({ locale }: { locale: string }) {
                   <Link
                     href="/login"
                     onClick={() => setMobileOpen(false)}
-                    className="rounded-sm border border-eg-border px-2.5 py-1.5 text-[12px] text-eg-text-sub"
+                    className="inline-flex min-h-10 items-center rounded-sm border border-eg-border px-2.5 py-1.5 text-[12px] text-eg-text-sub"
                   >
                     {t("login")}
                   </Link>
                   <Link
                     href="/register"
                     onClick={() => setMobileOpen(false)}
-                    className="rounded-sm bg-eg-blue px-2.5 py-1.5 text-[12px] font-medium text-eg-darker"
+                    className="inline-flex min-h-10 items-center rounded-sm bg-eg-blue px-2.5 py-1.5 text-[12px] font-medium text-eg-darker"
                   >
                     {t("register")}
                   </Link>

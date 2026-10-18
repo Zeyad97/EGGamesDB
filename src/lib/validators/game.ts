@@ -33,8 +33,6 @@ export const gameSubmissionSchema = z.object({
 
 export const reviewSchema = z.object({
   rating: z.number().int().min(1).max(10),
-  content: z.string().max(2000).optional(),
-  is_recommended: z.boolean(),
 });
 
 export const reportSchema = z.object({

@@ -25,6 +25,10 @@ function redirectTo(request: NextRequest, pathname: string) {
   return NextResponse.redirect(new URL(pathname, request.nextUrl.origin));
 }
 
+function isMissingCodeVerifier(error: { code?: string; message?: string } | null | undefined) {
+  return error?.code === "pkce_code_verifier_not_found" || /code verifier/i.test(error?.message ?? "");
+}
+
 export async function GET(request: NextRequest) {
   const locale = getLocale(request.nextUrl.searchParams.get("locale"));
   const code = request.nextUrl.searchParams.get("code");
@@ -32,6 +36,9 @@ export async function GET(request: NextRequest) {
   const failurePath = nextPath === "/reset-password"
     ? `/${locale}/forgot-password?error=link_expired`
     : `/${locale}/login?error=confirm_failed`;
+  const missingVerifierPath = nextPath === "/reset-password"
+    ? failurePath
+    : `/${locale}/login?confirmed=1`;
 
   if (!code) {
     return redirectTo(request, failurePath);
@@ -41,10 +48,11 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
-      return redirectTo(request, failurePath);
+      return redirectTo(request, isMissingCodeVerifier(error) ? missingVerifierPath : failurePath);
     }
-  } catch {
-    return redirectTo(request, failurePath);
+  } catch (error) {
+    const authError = error instanceof Error ? { message: error.message } : null;
+    return redirectTo(request, isMissingCodeVerifier(authError) ? missingVerifierPath : failurePath);
   }
 
   return redirectTo(request, `/${locale}${nextPath}`);

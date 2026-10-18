@@ -27,6 +27,18 @@ const ACCOUNT_OPTIONS = [
   },
 ] as const;
 
+// Returned by the "Before User Created" hook (supabase/migrations/011). Matched
+// exactly, so the real email rate limit (over_email_send_rate_limit) is never
+// shown as the network limit message.
+const SIGNUP_LIMIT_MARKER = "signup_limit_reached";
+const isSignupLimitError = (error: { message: string; code?: string }) =>
+  error.code === SIGNUP_LIMIT_MARKER || error.message.includes(SIGNUP_LIMIT_MARKER);
+
+// Supabase returns a fake success for an email that is already registered: the
+// user comes back with an empty `identities` array and no email is sent.
+const isEmailAlreadyRegistered = (user: { identities?: unknown[] } | null) =>
+  Boolean(user && Array.isArray(user.identities) && user.identities.length === 0);
+
 export default function RegisterPage() {
   const t = useTranslations("auth");
   const tv = useTranslations("validation");
@@ -36,6 +48,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
+  const [emailTaken, setEmailTaken] = useState(false);
 
   const {
     register,
@@ -45,7 +58,8 @@ export default function RegisterPage() {
 
   const onSubmit = async (data: RegisterInput) => {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    setEmailTaken(false);
+    const { data: signUpData, error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
@@ -61,7 +75,14 @@ export default function RegisterPage() {
     setLoading(false);
 
     if (error) {
-      toast.error(t("auth_error"));
+      toast.error(isSignupLimitError(error) ? t("signup_limit_reached") : t("auth_error"));
+      return;
+    }
+
+    // No error, but the email already belongs to an account: nothing was sent,
+    // so do not show the success message or go to the verify-email page.
+    if (isEmailAlreadyRegistered(signUpData.user)) {
+      setEmailTaken(true);
       return;
     }
 
@@ -146,7 +167,7 @@ export default function RegisterPage() {
               placeholder={t("email_placeholder")}
               prefix={<Mail size={14} />}
               error={validationError(errors.email?.message)}
-              {...register("email")}
+              {...register("email", { onChange: () => setEmailTaken(false) })}
             />
             <Input
               label={t("password")}
@@ -160,6 +181,29 @@ export default function RegisterPage() {
             <p className="border border-eg-border bg-eg-surface p-2.5 text-[11px] leading-5 text-eg-text-sub">
               {t("register_notice")}
             </p>
+
+            {emailTaken && (
+              <div
+                role="alert"
+                className="border border-eg-gold/50 bg-eg-gold/10 p-2.5 text-xs leading-5 text-eg-text-sub"
+              >
+                {t.rich("email_already_registered", {
+                  login: (chunks) => (
+                    <Link href="/login" className="font-semibold text-eg-gold hover:text-white">
+                      {chunks}
+                    </Link>
+                  ),
+                  reset: (chunks) => (
+                    <Link
+                      href="/forgot-password"
+                      className="font-semibold text-eg-gold hover:text-white"
+                    >
+                      {chunks}
+                    </Link>
+                  ),
+                })}
+              </div>
+            )}
 
             <Button type="submit" loading={loading} className="w-full">
               {t("register")}

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ArrowUpRight, ChevronDown } from "lucide-react";
-import { motion, useInView, type Variants } from "framer-motion";
+import { motion, useInView } from "framer-motion";
 import { usePrefersReducedMotion } from "@/lib/hooks/useCarousel";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
@@ -22,34 +22,6 @@ interface LandingExperienceProps {
   previews: LandingGame[];
   usingDemo: boolean;
 }
-
-const entranceContainer: Variants = {
-  hidden: {},
-  visible: {
-    transition: {
-      delayChildren: 0.52,
-      staggerChildren: 0.12,
-    },
-  },
-};
-
-const entranceItem: Variants = {
-  hidden: { opacity: 0, y: 18 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.72, ease: [0.22, 1, 0.36, 1] },
-  },
-};
-
-const reelItem: Variants = {
-  hidden: { opacity: 0, y: 24 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] },
-  },
-};
 
 export function LandingExperience({ locale, latest, previews, usingDemo }: LandingExperienceProps) {
   const t = useTranslations("landing");
@@ -111,6 +83,7 @@ export function LandingExperience({ locale, latest, previews, usingDemo }: Landi
           transition={{ duration: 0.75, ease: "easeOut" }}
         >
           {media.map((source, index) => {
+            if (index !== activeMedia && index !== (activeMedia + 1) % media.length) return null;
             const active = index === activeMedia;
             return (
               <motion.div
@@ -159,62 +132,45 @@ export function LandingExperience({ locale, latest, previews, usingDemo }: Landi
         />
         <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[2] h-px bg-eg-gold/80" />
 
-        {!reducedMotion && (
-          <motion.div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 z-30 bg-eg-nav"
-            initial={{ x: "-105%" }}
-            animate={{ x: ["-105%", "0%", "105%"] }}
-            transition={{ duration: 1.22, times: [0, 0.45, 1], ease: [0.76, 0, 0.24, 1] }}
-          />
-        )}
+        <div
+          aria-hidden="true"
+          className="landing-hero-curtain pointer-events-none absolute inset-0 z-[3] bg-eg-nav"
+        />
 
         <div
-          className="relative z-10 mx-auto flex min-h-[100svh] w-full max-w-[1600px] flex-col justify-end px-6 pb-16 pt-28 sm:px-10 sm:pb-20 lg:px-16 lg:pb-24"
+          className="landing-hero-content relative z-10 mx-auto flex min-h-[100svh] w-full max-w-[1600px] flex-col justify-end px-6 pb-[calc(4rem+env(safe-area-inset-bottom))] pt-[calc(7rem+env(safe-area-inset-top))] sm:px-10 sm:pb-20 sm:pt-28 lg:px-16 lg:pb-24"
           dir={contentDirection}
         >
-          <motion.div
-            aria-hidden="true"
-            className="mb-7 h-px w-full max-w-3xl origin-left bg-eg-gold/80 rtl:origin-right"
-            initial={reducedMotion ? false : { scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ delay: reducedMotion ? 0 : 0.44, duration: reducedMotion ? 0 : 0.8, ease: [0.22, 1, 0.36, 1] }}
-          />
+          <div aria-hidden="true" className="landing-hero-rule mb-7 h-px w-full max-w-3xl origin-left bg-eg-gold/80 rtl:origin-right" />
 
-          <motion.div
-            className="max-w-4xl"
-            variants={entranceContainer}
-            initial={reducedMotion ? false : "hidden"}
-            animate="visible"
-          >
-            <motion.div variants={entranceItem} className="flex flex-wrap items-center gap-x-4 gap-y-2">
+          <div className="landing-hero-copy max-w-4xl">
+            <div className="landing-hero-enter landing-hero-enter--1 flex flex-wrap items-center gap-x-4 gap-y-2">
               <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-eg-gold sm:text-[11px]">
                 {t("latest_label")}
               </p>
               {usingDemo && <p className="text-[10px] text-eg-text-sub sm:text-[11px]">{t("demo_label")}</p>}
-            </motion.div>
+            </div>
 
-            <motion.h1
+            <h1
               id="landing-title"
-              variants={entranceItem}
-              className="mt-4 max-w-[13ch] text-[clamp(3.25rem,13vw,9.5rem)] font-semibold leading-[0.88] tracking-[-0.065em] text-eg-heading"
+              className="landing-hero-enter landing-hero-enter--2 mt-4 max-w-[13ch] text-[clamp(3.25rem,13vw,9.5rem)] font-semibold leading-[0.88] tracking-[-0.065em] text-eg-heading"
             >
               {title}
-            </motion.h1>
+            </h1>
 
-            <motion.p variants={entranceItem} className="mt-6 max-w-md text-base leading-7 text-eg-text sm:text-lg sm:leading-8">
+            <p className="landing-hero-enter landing-hero-enter--3 mt-6 max-w-md text-base leading-7 text-eg-text sm:text-lg sm:leading-8">
               {t("persuasive_line")}
-            </motion.p>
+            </p>
 
             {latest && (
-              <motion.p variants={entranceItem} className="mt-4 text-xs text-eg-text-sub sm:text-sm">
+              <p className="landing-hero-enter landing-hero-enter--4 mt-4 text-xs text-eg-text-sub sm:text-sm">
                 {latest.developer}
                 {latest.year ? <span className="mx-2 text-eg-gold/70">·</span> : null}
                 {latest.year}
-              </motion.p>
+              </p>
             )}
 
-            <motion.div variants={entranceItem} className="mt-8">
+            <div className="landing-hero-enter landing-hero-enter--5 landing-hero-cta mt-8">
               <Link
                 href="/store"
                 aria-label={t("entry_aria")}
@@ -239,12 +195,12 @@ export function LandingExperience({ locale, latest, previews, usingDemo }: Landi
                   />
                 )}
               </Link>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
           {media.length > 0 && (
             <div
-              className="mt-12 w-full max-w-xl"
+              className="landing-hero-progress mt-12 w-full max-w-xl"
               role="img"
               aria-label={`${t("progress_label")}: ${t("progress_item", { current: activeMedia + 1, total: media.length })}`}
             >
@@ -282,19 +238,14 @@ export function LandingExperience({ locale, latest, previews, usingDemo }: Landi
         <div aria-hidden="true" className="h-1 bg-eg-nav" />
         <div aria-hidden="true" className="h-px bg-eg-gold/60" />
         <div className="px-6 pb-9 pt-10 sm:px-10 sm:pb-12 sm:pt-14 lg:px-16">
-          <motion.div
-            variants={entranceContainer}
-            initial={reducedMotion ? false : "hidden"}
-            whileInView="visible"
-            viewport={{ once: true, amount: 0.18 }}
-          >
-            <motion.p variants={reelItem} className="text-[10px] font-semibold uppercase tracking-[0.3em] text-eg-gold sm:text-[11px]">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-eg-gold sm:text-[11px]">
               {t("reel_label")}
-            </motion.p>
-            <motion.h2 variants={reelItem} id="landing-reel-title" className="mt-3 max-w-xl text-2xl font-semibold tracking-[-0.03em] text-eg-heading sm:text-3xl">
+            </p>
+            <h2 id="landing-reel-title" className="mt-3 max-w-xl text-2xl font-semibold tracking-[-0.03em] text-eg-heading sm:text-3xl">
               {t("previews_heading")}
-            </motion.h2>
-          </motion.div>
+            </h2>
+          </div>
         </div>
 
         {previews.length > 0 ? (
@@ -302,9 +253,6 @@ export function LandingExperience({ locale, latest, previews, usingDemo }: Landi
             <motion.div
               className="flex w-max gap-4 px-6 sm:gap-5 sm:px-10 lg:px-16"
               dir="ltr"
-              initial={reducedMotion ? false : { opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, amount: 0.12 }}
               animate={reducedMotion || !reelInView ? { x: 0 } : { x: reelMotion }}
               transition={
                 reducedMotion || !reelInView

@@ -101,8 +101,7 @@ export default async function GamePage({ params }: GamePageProps) {
         .from("game_reviews")
         .select("*, profiles(username, display_name, avatar_url)")
         .eq("game_id", game.id)
-        .order("created_at", { ascending: false })
-        .limit(20),
+        .order("created_at", { ascending: false }),
       supabase
         .from("games")
         .select(

@@ -26,6 +26,10 @@ The templates use Supabase's `{{ .ConfirmationURL }}`, `{{ .Token }}`, `{{ .Emai
 
 The registration flow passes `emailRedirectTo` to the implemented `/api/auth/callback` route. Keep the Site URL and allowed Redirect URLs above in sync with the deployed domain.
 
+## Confirmation link does nothing
+
+In Supabase Dashboard, open **Authentication → URL Configuration**. Set **Site URL** to `https://www.eggamedb.com` (with `www`, not the bare domain) and add `https://www.eggamedb.com/**` to **Redirect URLs**. A mismatch can send confirmation links to the bare domain, where the browser's PKCE verifier may not be available.
+
 ## Forgot password
 
 The forgot-password flow sends users through the PKCE callback at `/api/auth/callback`, then returns them to the password reset form. Install the **Reset password** email template from `reset-password.html` so recovery emails use the correct confirmation link.

@@ -31,7 +31,7 @@ export function Footer() {
       <div className="store-container py-6">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
           <div className="max-w-md">
-            <Link href="/" className="inline-flex rounded-sm">
+            <Link href="/" className="inline-flex min-h-10 items-center rounded-sm sm:min-h-0">
               <Wordmark />
             </Link>
             <p className="mt-2 text-xs leading-5 text-eg-muted">{t("footer_description")}</p>
@@ -43,7 +43,7 @@ export function Footer() {
                   aria-label={label}
                   target={href.startsWith("http") ? "_blank" : undefined}
                   rel={href.startsWith("http") ? "noopener noreferrer" : undefined}
-                  className="text-eg-muted transition-colors hover:text-eg-text-sub"
+                  className="inline-flex min-h-10 min-w-10 items-center justify-center text-eg-muted transition-colors hover:text-eg-text-sub sm:min-h-0 sm:min-w-0"
                 >
                   <Icon size={15} aria-hidden="true" />
                 </a>
@@ -59,7 +59,7 @@ export function Footer() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-xs text-eg-text-sub transition-colors hover:text-eg-heading"
+                      className="inline-flex min-h-10 min-w-10 items-center text-xs text-eg-text-sub transition-colors hover:text-eg-heading sm:min-h-0 sm:min-w-0"
                     >
                       {t(item.key)}
                     </Link>
@@ -75,7 +75,7 @@ export function Footer() {
                   <li key={item.href}>
                     <Link
                       href={item.href}
-                      className="text-xs text-eg-text-sub transition-colors hover:text-eg-heading"
+                      className="inline-flex min-h-10 min-w-10 items-center text-xs text-eg-text-sub transition-colors hover:text-eg-heading sm:min-h-0 sm:min-w-0"
                     >
                       {t(item.key)}
                     </Link>
@@ -86,7 +86,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-2 border-t border-eg-border pt-4 text-[11px] text-eg-muted sm:flex-row sm:items-center sm:justify-between">
+        <div className="mt-6 flex flex-col gap-2 border-t border-eg-border pt-4 text-xs text-eg-muted sm:flex-row sm:items-center sm:justify-between sm:text-[11px]">
           <p>© {new Date().getFullYear()} EGGameDB · MIT License</p>
           <p className="flex items-center gap-1.5">
             <span>{tc("made_in_egypt")}</span>
@@ -97,7 +97,7 @@ export function Footer() {
               href="https://zyaddev.com"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-eg-text-sub transition-colors hover:text-white"
+              className="inline-flex min-h-10 min-w-10 items-center text-eg-text-sub transition-colors hover:text-white sm:min-h-0 sm:min-w-0"
             >
               ZYAD
             </a>

@@ -21,7 +21,7 @@ export function FeaturedGames({ games, locale }: FeaturedGamesProps) {
           </h2>
           <Link
             href="/games?sort=average_rating"
-            className="text-xs text-eg-blue transition-colors hover:text-white"
+            className="inline-flex min-h-10 items-center text-xs text-eg-blue transition-colors hover:text-white sm:min-h-0"
           >
             {t("view_all")}
           </Link>

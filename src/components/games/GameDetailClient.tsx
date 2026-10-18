@@ -7,22 +7,19 @@ import {
   Calendar,
   ExternalLink,
   Eye,
-  Flag,
   Globe,
   Share2,
   ShoppingCart,
   Star,
-  ThumbsDown,
-  ThumbsUp,
   User,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { Link } from "@/i18n/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Textarea } from "@/components/ui/Input";
 import { Avatar } from "@/components/ui/Avatar";
 import { GameCard } from "@/components/games/GameCard";
+import { ReportGameDialog } from "@/components/games/ReportGameDialog";
 import { DemoNotice } from "@/components/games/DemoNotice";
 import { GamePrice, GameRating } from "@/components/games/GamePrice";
 import { GameScreenshots } from "@/components/games/GameScreenshots";
@@ -55,7 +52,7 @@ export function GameDetailClient({ game, reviews, relatedGames, locale }: GameDe
   const longDescription =
     locale === "ar" && game.long_description_ar ? game.long_description_ar : game.long_description;
 
-  const positive = reviews.filter((review) => review.is_recommended).length;
+  const positive = reviews.filter((review) => review.rating >= 6).length;
   const reviewPct = reviews.length ? Math.round((positive / reviews.length) * 100) : null;
   const capsule = game.capsule_image || game.header_image;
   const developerName = game.profiles?.display_name || game.developer_name;
@@ -90,14 +87,14 @@ export function GameDetailClient({ game, reviews, relatedGames, locale }: GameDe
           <Link href="/games" className="transition-colors hover:text-eg-blue">
             {t("all_games")}
           </Link>
-          {game.genres[0] && (
+          {game.genres?.[0] && (
             <>
               <span aria-hidden="true">/</span>
               <Link
-                href={`/games?genre=${encodeURIComponent(game.genres[0])}`}
+                href={`/games?genre=${encodeURIComponent(game.genres?.[0])}`}
                 className="transition-colors hover:text-eg-blue"
               >
-                {genreLabel(game.genres[0])}
+                {genreLabel(game.genres?.[0])}
               </Link>
             </>
           )}
@@ -194,12 +191,7 @@ export function GameDetailClient({ game, reviews, relatedGames, locale }: GameDe
               <Share2 size={13} aria-hidden="true" />
               {t("share")}
             </Button>
-            {profile && !demo && (
-              <Button type="button" variant="ghost" size="sm" className="gap-1.5 text-red-300">
-                <Flag size={13} aria-hidden="true" />
-                {t("report_game")}
-              </Button>
-            )}
+            {!demo && <ReportGameDialog gameId={game.id} profile={profile} isDemo={demo} />}
           </div>
         </div>
 
@@ -387,15 +379,14 @@ function ReviewsSection({
   const td = useTranslations("demo");
   const supabase = createClient();
   const [rating, setRating] = useState(0);
-  const [content, setContent] = useState("");
-  const [isRecommended, setIsRecommended] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [reviewList, setReviewList] = useState(reviews);
 
-  const alreadyReviewed = Boolean(
-    profile && reviewList.some((review) => review.user_id === profile.id)
-  );
+  const alreadyReviewed = Boolean(profile && reviewList.some((review) => review.user_id === profile.id));
   const isAdmin = profile?.role === "admin" || profile?.role === "super_admin";
+  const averageRating = reviewList.length ? reviewList.reduce((sum, item) => sum + item.rating, 0) / reviewList.length : 0;
+  const ratingCounts = Array.from({ length: 10 }, (_, index) => reviewList.filter((item) => item.rating === index + 1).length);
+  const maxRatingCount = Math.max(1, ...ratingCounts);
 
   const submitReview = async () => {
     if (!profile) {
@@ -414,8 +405,6 @@ function ReviewsSection({
         game_id: gameId,
         user_id: profile.id,
         rating,
-        content: content.trim() || null,
-        is_recommended: isRecommended,
       })
       .select("*, profiles(username, display_name, avatar_url)")
       .single();
@@ -429,7 +418,6 @@ function ReviewsSection({
     toast.success(t("submit_review_action"));
     setReviewList((previous) => [data, ...previous]);
     setRating(0);
-    setContent("");
   };
 
   const deleteReview = async (reviewId: string) => {
@@ -444,6 +432,29 @@ function ReviewsSection({
 
   return (
     <div>
+      <section aria-label={t("rating_distribution")} className="mb-4 grid gap-4 border border-eg-border bg-eg-card p-4 sm:grid-cols-[180px_minmax(0,1fr)]">
+        <div className="flex flex-col items-center justify-center border-b border-eg-border pb-3 sm:border-b-0 sm:border-e sm:pb-0 sm:pe-4">
+          <span className="text-4xl font-bold leading-none text-eg-gold">{reviewList.length ? averageRating.toFixed(1) : "-"}</span>
+          <span className="mt-1 text-xs text-eg-muted">{t("average_rating")}</span>
+          <div className="mt-2 flex" aria-label={t("rating_aria", { rating: averageRating.toFixed(1) })}>
+            {Array.from({ length: 10 }, (_, index) => <Star key={index} size={12} className={index < Math.round(averageRating) ? "fill-eg-gold text-eg-gold" : "text-eg-muted/40"} aria-hidden="true" />)}
+          </div>
+          <span className="mt-1 text-[11px] text-eg-muted">{t("total_ratings", { count: reviewList.length })}</span>
+        </div>
+        <div>
+          <h3 className="mb-2 text-xs font-semibold text-eg-text-sub">{t("rating_distribution")}</h3>
+          <div className="space-y-1">
+            {ratingCounts.map((count, index) => (
+              <div key={index} className="flex items-center gap-2 text-[11px] text-eg-muted">
+                <span className="w-4 text-end">{10 - index}</span>
+                <Star size={10} className="fill-eg-gold text-eg-gold" aria-hidden="true" />
+                <div className="h-2 min-w-0 flex-1 bg-eg-surface"><div className="h-full bg-eg-gold" style={{ width: `${(count / maxRatingCount) * 100}%` }} /></div>
+                <span className="w-6 text-end">{count}</span>
+              </div>
+            )).reverse()}
+          </div>
+        </div>
+      </section>
       {demo ? (
         <div className="mb-4 border-s-2 border-eg-gold bg-eg-card px-2.5 py-1.5">
           <p className="text-[11px] leading-5 text-eg-text-sub">{td("reviews_disabled")}</p>
@@ -456,7 +467,7 @@ function ReviewsSection({
             <>
               <p className="mb-3 text-[13px] font-semibold text-eg-heading">{t("write_review")}</p>
 
-              <div className="mb-3 flex items-center gap-0.5" role="group" aria-label="Rating from 1 to 10">
+              <div className="mb-3 flex items-center gap-0.5" role="group" aria-label={t("rating_input_aria")}>
                 {Array.from({ length: 10 }, (_, index) => (
                   <button
                     key={index}
@@ -473,45 +484,6 @@ function ReviewsSection({
                   </button>
                 ))}
               </div>
-
-              <div className="mb-3 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsRecommended(true)}
-                  aria-pressed={isRecommended}
-                  className={
-                    "inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 text-[11px] transition-colors " +
-                    (isRecommended
-                      ? "border-eg-green/40 bg-eg-green/10 text-eg-green"
-                      : "border-eg-border text-eg-muted hover:text-white")
-                  }
-                >
-                  <ThumbsUp size={11} aria-hidden="true" />
-                  {t("recommended_yes")}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsRecommended(false)}
-                  aria-pressed={!isRecommended}
-                  className={
-                    "inline-flex items-center gap-1.5 rounded-sm border px-2.5 py-1 text-[11px] transition-colors " +
-                    (!isRecommended
-                      ? "border-eg-red/40 bg-eg-red/10 text-red-300"
-                      : "border-eg-border text-eg-muted hover:text-eg-heading")
-                  }
-                >
-                  <ThumbsDown size={11} aria-hidden="true" />
-                  {t("recommended_no")}
-                </button>
-              </div>
-
-              <Textarea
-                rows={3}
-                placeholder={t("review_placeholder")}
-                value={content}
-                onChange={(event) => setContent(event.target.value)}
-                className="mb-3"
-              />
 
               <Button size="sm" onClick={submitReview} loading={submitting}>
                 {t("submit_review_action")}
@@ -532,13 +504,14 @@ function ReviewsSection({
         </div>
       )}
 
+      {reviewList.length > 0 && <h3 className="mb-2 text-xs font-semibold text-eg-text-sub">{t("recent_ratings")}</h3>}
       {reviewList.length === 0 ? (
         <p className="border border-eg-border bg-eg-card px-4 py-8 text-center text-xs text-eg-muted">
           {t("no_reviews")}
         </p>
       ) : (
         <ul className="divide-y divide-eg-border border-y border-eg-border">
-          {reviewList.map((review) => (
+          {reviewList.slice(0, 10).map((review) => (
             <li key={review.id} className="py-3">
               <div className="flex items-start gap-3">
                 <Avatar
@@ -551,19 +524,6 @@ function ReviewsSection({
                     <span className="text-[13px] font-semibold text-white">
                       {review.profiles?.display_name || review.profiles?.username}
                     </span>
-                    <Badge variant={review.is_recommended ? "green" : "red"}>
-                      {review.is_recommended ? (
-                        <>
-                          <ThumbsUp size={9} aria-hidden="true" />
-                          {t("recommended_yes")}
-                        </>
-                      ) : (
-                        <>
-                          <ThumbsDown size={9} aria-hidden="true" />
-                          {t("recommended_no")}
-                        </>
-                      )}
-                    </Badge>
                     <span className="flex" aria-label={`${review.rating}/10`}>
                       {Array.from({ length: 10 }, (_, index) => (
                         <Star
@@ -577,7 +537,7 @@ function ReviewsSection({
                     <span className="text-[11px] text-eg-muted">
                       {formatDate(review.created_at)}
                     </span>
-                    {isAdmin && (
+                    {(isAdmin || review.user_id === profile?.id) && (
                       <button
                         type="button"
                         onClick={() => deleteReview(review.id)}
@@ -587,9 +547,6 @@ function ReviewsSection({
                       </button>
                     )}
                   </div>
-                  {review.content && (
-                    <p className="mt-2 text-[13px] leading-6 text-eg-text-sub">{review.content}</p>
-                  )}
                 </div>
               </div>
             </li>

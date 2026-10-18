@@ -47,6 +47,25 @@ export default async function AdminPage({ params }: AdminPageProps) {
     supabase.from("game_reviews").select("*, profiles!game_reviews_user_id_fkey(username, display_name), games!game_reviews_game_id_fkey(title, slug)").order("created_at", { ascending: false }).limit(50),
   ]);
 
+  const { data: reportRows, error: reportsError } = await supabase
+    .from("reports")
+    .select("*")
+    .order("created_at", { ascending: false })
+    .limit(100);
+  const reportUsers = [...new Set((reportRows ?? []).map((report) => report.reporter_id))];
+  const reportGameIds = [...new Set((reportRows ?? []).filter((report) => report.target_type === "game").map((report) => report.target_id))];
+  const [{ data: reporterProfiles }, { data: reportGames }] = await Promise.all([
+    reportUsers.length ? supabase.from("profiles").select("id, username, display_name").in("id", reportUsers) : Promise.resolve({ data: [] }),
+    reportGameIds.length ? supabase.from("games").select("id, slug, title, title_ar").in("id", reportGameIds) : Promise.resolve({ data: [] }),
+  ]);
+  const reportersById = new Map((reporterProfiles ?? []).map((reporter) => [reporter.id, reporter]));
+  const gamesById = new Map((reportGames ?? []).map((game) => [game.id, game]));
+  const reports = (reportRows ?? []).map((report) => ({
+    ...report,
+    profiles: reportersById.get(report.reporter_id),
+    games: gamesById.get(report.target_id) ?? null,
+  }));
+
   // Studios (migration 008). A missing table is reported as a notice in the panel.
   const { data: studioRows, error: studioError } = await supabase.from("studios").select("*").order("name");
   const { data: approvedDevelopers } = await supabase.from("games").select("developer_name").eq("status", "approved");
@@ -89,6 +108,8 @@ export default async function AdminPage({ params }: AdminPageProps) {
       contactMessages={contactMessages ?? []}
       developerApplications={developerApplications ?? []}
       allReviews={allReviews ?? []}
+      reports={reports}
+      reportsTableMissing={!!reportsError}
       isSuperAdmin={profile.role === "super_admin"}
       currentUserId={user.id}
       locale={locale}

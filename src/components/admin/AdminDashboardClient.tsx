@@ -34,7 +34,7 @@ import {
   Trash2,
 } from "lucide-react";
 import toast from "react-hot-toast";
-import type { AdminStats, ContactMessage, Game, GameReview, Profile } from "@/types";
+import type { AdminStats, ContactMessage, Game, GameReview, Profile, Report } from "@/types";
 
 interface AdminDashboardClientProps {
   stats: AdminStats;
@@ -45,6 +45,8 @@ interface AdminDashboardClientProps {
   contactMessages: ContactMessage[];
   developerApplications: Profile[];
   allReviews: (GameReview & { profiles?: Profile; games?: Partial<Game> })[];
+  reports: Report[];
+  reportsTableMissing: boolean;
   isSuperAdmin: boolean;
   currentUserId: string;
   locale: string;
@@ -54,7 +56,7 @@ interface AdminDashboardClientProps {
   studioSuggestions: string[];
 }
 
-type AdminTab = "overview" | "games" | "users" | "messages" | "reviews" | "applications" | "studios";
+type AdminTab = "overview" | "games" | "reports" | "users" | "messages" | "reviews" | "applications" | "studios";
 
 const statCards = (stats: AdminStats, t: (key: string) => string) => [
   { icon: Gamepad2, label: t("total_games"), value: stats.total_games },
@@ -74,6 +76,8 @@ export function AdminDashboardClient({
   contactMessages: initialMessages,
   developerApplications: initialApplications,
   allReviews: initialReviews,
+  reports: initialReports,
+  reportsTableMissing,
   isSuperAdmin,
   currentUserId,
   locale,
@@ -83,6 +87,7 @@ export function AdminDashboardClient({
   studioSuggestions,
 }: AdminDashboardClientProps) {
   const t = useTranslations("admin");
+  const tr = useTranslations("reports");
   const supabase = createClient();
   const prefersReducedMotion = usePrefersReducedMotion();
   const [activeTab, setActiveTab] = useState<AdminTab>("overview");
@@ -94,6 +99,33 @@ export function AdminDashboardClient({
   const [messages, setMessages] = useState(initialMessages);
   const [applications, setApplications] = useState(initialApplications);
   const [reviews, setReviews] = useState(initialReviews);
+  const [reports, setReports] = useState(initialReports);
+  const [reportDialog, setReportDialog] = useState<{ report: Report; status: "resolved" | "dismissed" } | null>(null);
+  const [resolutionNote, setResolutionNote] = useState("");
+
+  const handleReportUpdate = async () => {
+    if (!reportDialog) return;
+    setProcessing(`report-${reportDialog.report.id}`);
+    const resolvedAt = new Date().toISOString();
+    const { error } = await supabase.from("reports").update({
+      status: reportDialog.status,
+      resolved_by: currentUserId,
+      resolved_at: resolvedAt,
+      resolution_note: resolutionNote.trim() || null,
+    }).eq("id", reportDialog.report.id);
+    setProcessing(null);
+    if (error) {
+      const missing = ["42703", "PGRST204"].includes(error.code ?? "") || /resolution_note|resolved_at|schema cache|does not exist/i.test(error.message);
+      toast.error(missing ? tr("admin_missing") : tr("update_error"));
+      return;
+    }
+    setReports((previous) => previous.map((item) => item.id === reportDialog.report.id
+      ? { ...item, status: reportDialog.status, resolved_by: currentUserId, resolved_at: resolvedAt, resolution_note: resolutionNote.trim() || null }
+      : item));
+    toast.success(tr("updated"));
+    setReportDialog(null);
+    setResolutionNote("");
+  };
 
   const handleMessageStatus = async (msgId: string, status: string) => {
     const { error } = await supabase.from("contact_messages").update({ status }).eq("id", msgId);
@@ -234,6 +266,7 @@ export function AdminDashboardClient({
   const tabs = [
     { key: "overview" as const, icon: LayoutDashboard, label: t("tabs.overview") },
     { key: "games" as const, icon: Gamepad2, label: t("tabs.games", { count: stats.pending_games }) },
+    { key: "reports" as const, icon: AlertTriangle, label: t("tabs.reports", { count: reports.filter((report) => report.status === "open").length }) },
     { key: "applications" as const, icon: Rocket, label: t("tabs.applications", { count: applications.length }) },
     { key: "reviews" as const, icon: MessageSquare, label: t("tabs.reviews", { count: stats.total_reviews }) },
     { key: "messages" as const, icon: Mail, label: t("tabs.messages", { count: messages.length }) },
@@ -241,7 +274,7 @@ export function AdminDashboardClient({
     { key: "studios" as const, icon: Building2, label: t("tabs.studios", { count: studiosTableMissing ? 0 : initialStudios.length }) },
   ];
 
-  const entryMotion = prefersReducedMotion ? { initial: false } : { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 } };
+  const entryMotion = { initial: false, animate: { opacity: 1, y: 0 } };
 
   return (
     <div className="min-h-screen">
@@ -258,7 +291,7 @@ export function AdminDashboardClient({
         </header>
 
         <div className="grid grid-cols-2 border-x border-b border-eg-border sm:grid-cols-3 lg:grid-cols-6">
-          {statCards(stats, (key) => t(key)).map((stat, index) => (
+          {statCards({ ...stats, open_reports: reports.filter((report) => report.status === "open").length }, (key) => t(key)).map((stat, index) => (
             <motion.div
               key={stat.label}
               {...entryMotion}
@@ -401,6 +434,57 @@ export function AdminDashboardClient({
             </div>
           )}
 
+          {activeTab === "reports" && (
+            <section className="space-y-6">
+              {reportsTableMissing ? (
+                <div className="border border-eg-gold/40 bg-eg-card p-4 text-sm text-eg-text-sub">{tr("admin_missing")}</div>
+              ) : (
+                <>
+                  <div className="border border-eg-border bg-eg-card p-4 sm:p-5">
+                    <h2 className="font-bold text-eg-heading">{tr("open")}</h2>
+                    {reports.filter((report) => report.status === "open").length === 0 ? <p className="py-5 text-sm text-eg-muted">{tr("no_reports")}</p> : (
+                      <div className="mt-3 divide-y divide-eg-border">
+                        {reports.filter((report) => report.status === "open").map((report) => (
+                          <article key={report.id} className="py-3 first:pt-0">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Badge variant="gold">{tr("reason")}</Badge>
+                              <strong className="text-sm text-eg-heading">{report.reason}</strong>
+                              <span className="ms-auto text-xs text-eg-muted">{formatDate(report.created_at, locale)}</span>
+                            </div>
+                            <p className="mt-1 text-xs text-eg-text-sub">{tr("reporter")}: {report.profiles?.display_name || report.profiles?.username || t("unknown_user")}</p>
+                            {report.details && <p className="mt-2 whitespace-pre-wrap text-sm leading-5 text-eg-text-sub">{report.details}</p>}
+                            {report.games?.slug && <Link className="mt-2 inline-block text-xs text-eg-gold hover:underline" href={`/games/${report.games.slug}`}>{report.games.title || report.games.slug}</Link>}
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              <Button size="sm" variant="success" onClick={() => { setReportDialog({ report, status: "resolved" }); setResolutionNote(""); }}>{tr("resolve")}</Button>
+                              <Button size="sm" variant="danger" onClick={() => { setReportDialog({ report, status: "dismissed" }); setResolutionNote(""); }}>{tr("dismiss")}</Button>
+                            </div>
+                          </article>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                  <div className="border border-eg-border bg-eg-card p-4 sm:p-5">
+                    <h2 className="font-bold text-eg-heading">{tr("closed")}</h2>
+                    <div className="mt-3 divide-y divide-eg-border">
+                      {reports.filter((report) => report.status !== "open").map((report) => (
+                        <article key={report.id} className="py-3 first:pt-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant={report.status === "resolved" ? "green" : "outline"}>{tr(report.status)}</Badge>
+                            <strong className="text-sm text-eg-heading">{report.reason}</strong>
+                            <span className="ms-auto text-xs text-eg-muted">{formatDate(report.created_at, locale)}</span>
+                          </div>
+                          <p className="mt-1 text-xs text-eg-text-sub">{tr("reporter")}: {report.profiles?.display_name || report.profiles?.username || t("unknown_user")}</p>
+                          {report.resolution_note && <p className="mt-2 text-xs text-eg-text-sub">{tr("resolution_note")}: {report.resolution_note}</p>}
+                          {report.games?.slug && <Link className="mt-2 inline-block text-xs text-eg-gold hover:underline" href={`/games/${report.games.slug}`}>{report.games.title || report.games.slug}</Link>}
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </section>
+          )}
+
           {activeTab === "studios" && (
             <StudiosAdminPanel
               initialStudios={initialStudios}
@@ -413,7 +497,7 @@ export function AdminDashboardClient({
 
           {activeTab === "applications" && <section className="border border-eg-border bg-eg-card p-4 sm:p-5"><p className="text-[11px] uppercase tracking-[0.14em] text-eg-muted">{t("priority_label")}</p><h2 className="mt-1 font-bold text-eg-heading">{t("applications_title")}</h2><p className="mt-1 text-xs text-eg-muted">{t("applications_desc")}</p>{applications.length === 0 ? <p className="py-8 text-center text-sm text-eg-muted">{t("no_applications")}</p> : <div className="mt-4 divide-y divide-eg-border">{applications.map((dev) => <div key={dev.id} className="flex flex-wrap items-center gap-3 py-3 first:pt-0"><Avatar src={dev.avatar_url} name={dev.display_name || dev.username} size="sm" /><div className="min-w-0 flex-1"><p className="truncate text-sm font-medium text-eg-heading">{dev.display_name || dev.username}</p><p className="text-xs text-eg-muted">@{dev.username} · {t("applied", { date: formatDate(dev.created_at, locale) })}</p></div><div className="flex gap-2"><Button size="sm" variant="success" loading={processing === `dev-${dev.id}`} onClick={() => handleApproveDeveloper(dev.id)}><CheckCircle size={14} aria-hidden="true" />{t("approve")}</Button><Button size="sm" variant="danger" loading={processing === `dev-${dev.id}`} onClick={() => handleRejectDeveloper(dev.id)}><XCircle size={14} aria-hidden="true" />{t("reject")}</Button></div></div>)}</div>}</section>}
 
-          {activeTab === "reviews" && <section className="border border-eg-border bg-eg-card p-4 sm:p-5"><p className="text-[11px] uppercase tracking-[0.14em] text-eg-muted">{t("moderation_label")}</p><h2 className="mt-1 font-bold text-eg-heading">{t("reviews_title")}</h2><p className="mt-1 text-xs text-eg-muted">{t("reviews_desc")}</p>{reviews.length === 0 ? <p className="py-8 text-center text-sm text-eg-muted">{t("no_reviews")}</p> : <div className="mt-4 divide-y divide-eg-border">{reviews.map((review) => <article key={review.id} className="py-3 first:pt-0"><div className="flex flex-wrap items-center gap-2"><span className="text-sm font-medium text-eg-heading">{review.profiles?.display_name || review.profiles?.username || t("unknown_user")}</span><span className="text-xs text-eg-muted">{t("on")}</span>{review.games?.title && <Link href={`/games/${review.games.slug}`} className="text-xs text-eg-gold hover:underline">{review.games.title}</Link>}<span className="flex items-center gap-0.5" aria-label={t("rating_aria", { rating: review.rating })}>{Array.from({ length: 10 }, (_, index) => <Star key={index} size={10} className={index < review.rating ? "text-eg-gold fill-eg-gold" : "text-eg-muted"} aria-hidden="true" />)}</span><span className="ms-auto text-xs text-eg-muted">{formatDate(review.created_at, locale)}</span><Button variant="ghost" size="sm" className="gap-1 text-red-400 hover:text-red-300" onClick={() => handleDeleteReview(review.id)}><Trash2 size={13} aria-hidden="true" />{t("remove")}</Button></div>{review.content && <p className="mt-1 text-xs leading-relaxed text-eg-text-sub">{review.content}</p>}</article>)}</div>}</section>}
+          {activeTab === "reviews" && <section className="border border-eg-border bg-eg-card p-4 sm:p-5"><p className="text-[11px] uppercase tracking-[0.14em] text-eg-muted">{t("moderation_label")}</p><h2 className="mt-1 font-bold text-eg-heading">{t("reviews_title")}</h2><p className="mt-1 text-xs text-eg-muted">{t("reviews_desc")}</p>{reviews.length === 0 ? <p className="py-8 text-center text-sm text-eg-muted">{t("no_reviews")}</p> : <div className="mt-4 divide-y divide-eg-border">{reviews.map((review) => <article key={review.id} className="py-3 first:pt-0"><div className="flex flex-wrap items-center gap-2"><span className="text-sm font-medium text-eg-heading">{review.profiles?.display_name || review.profiles?.username || t("unknown_user")}</span><span className="text-xs text-eg-muted">{t("on")}</span>{review.games?.title && <Link href={`/games/${review.games.slug}`} className="text-xs text-eg-gold hover:underline">{review.games.title}</Link>}<span className="flex items-center gap-0.5" aria-label={t("rating_aria", { rating: review.rating })}>{Array.from({ length: 10 }, (_, index) => <Star key={index} size={10} className={index < review.rating ? "text-eg-gold fill-eg-gold" : "text-eg-muted"} aria-hidden="true" />)}</span><span className="ms-auto text-xs text-eg-muted">{formatDate(review.created_at, locale)}</span><Button variant="ghost" size="sm" className="gap-1 text-red-400 hover:text-red-300" onClick={() => handleDeleteReview(review.id)}><Trash2 size={13} aria-hidden="true" />{t("remove")}</Button></div></article>)}</div>}</section>}
 
           {activeTab === "messages" && <section className="border border-eg-border bg-eg-card p-4 sm:p-5"><p className="text-[11px] uppercase tracking-[0.14em] text-eg-muted">{t("inbox_label")}</p><h2 className="mt-1 font-bold text-eg-heading">{t("messages_title")}</h2><p className="mt-1 text-xs text-eg-muted">{t("messages_desc")}</p>{messages.length === 0 ? <p className="py-8 text-center text-sm text-eg-muted">{t("no_messages")}</p> : <div className="mt-4 space-y-3">{messages.map((message) => <article key={message.id} className={`border p-3 ${message.status === "new" ? "border-eg-gold/40 bg-eg-gold/5" : "border-eg-border"}`}><div className="flex flex-wrap items-center gap-2"><Badge variant={message.status === "new" ? "gold" : message.status === "read" ? "outline" : "green"}>{t(`message_status.${message.status}`)}</Badge><span className="text-sm font-medium text-eg-heading">{message.name}</span><span className="text-xs text-eg-muted">{message.email}</span><span className="ms-auto text-xs text-eg-muted">{formatDate(message.created_at, locale)}</span></div><p className="mt-2 text-sm font-semibold text-eg-text">{message.subject}</p><p className="mt-1 text-xs leading-relaxed text-eg-text-sub">{message.message}</p><div className="mt-3 flex flex-wrap gap-2">{message.status === "new" && <Button size="sm" variant="secondary" onClick={() => handleMessageStatus(message.id, "read")}>{t("mark_read")}</Button>}<Button size="sm" variant="secondary" onClick={() => handleMessageStatus(message.id, "resolved")}>{t("mark_resolved")}</Button><Button size="sm" variant="ghost" className="gap-1 text-red-400 hover:text-red-300" onClick={() => handleDeleteMessage(message.id)}><Trash2 size={13} aria-hidden="true" />{t("delete")}</Button></div></article>)}</div>}</section>}
 
@@ -425,6 +509,17 @@ export function AdminDashboardClient({
         <div className="space-y-4">
           <Textarea label={t("rejection_reason")} rows={4} placeholder={t("rejection_placeholder")} value={rejectionReason} onChange={(event) => setRejectionReason(event.target.value)} />
           <div className="flex flex-col-reverse gap-2 sm:flex-row"><Button variant="danger" onClick={handleReject} loading={processing === rejectModal.gameId} className="flex-1">{t("reject_game")}</Button><Button variant="ghost" onClick={() => setRejectModal({ open: false, gameId: "", gameTitle: "" })} className="flex-1">{t("cancel")}</Button></div>
+        </div>
+      </Modal>
+      <Modal open={Boolean(reportDialog)} onClose={() => setReportDialog(null)} title={reportDialog ? tr(reportDialog.status) : ""}>
+        <div className="space-y-4">
+          {reportDialog && <p className="text-sm text-eg-text-sub">{reportDialog.report.reason}</p>}
+          <Textarea label={tr("resolution_note")} rows={3} maxLength={500} value={resolutionNote} onChange={(event) => setResolutionNote(event.target.value)} />
+          <p className="text-end text-[11px] text-eg-muted">{resolutionNote.length}/500</p>
+          <div className="flex flex-wrap justify-end gap-2">
+            <Button variant="ghost" onClick={() => setReportDialog(null)}>{tr("cancel")}</Button>
+            <Button variant={reportDialog?.status === "resolved" ? "success" : "danger"} onClick={handleReportUpdate} loading={Boolean(reportDialog && processing === `report-${reportDialog.report.id}`)}>{reportDialog ? tr(reportDialog.status === "resolved" ? "resolve" : "dismiss") : ""}</Button>
+          </div>
         </div>
       </Modal>
     </div>

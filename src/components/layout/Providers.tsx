@@ -4,6 +4,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { Toaster } from "react-hot-toast";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { AuthProvider } from "@/components/auth/AuthProvider";
+import { AuthRedirectHandler } from "@/components/auth/AuthRedirectHandler";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SetupBanner } from "@/components/layout/SetupBanner";
@@ -22,6 +23,7 @@ function AppShell({ children, locale }: Pick<ProvidersProps, "children" | "local
 
   return (
     <AuthProvider>
+      <AuthRedirectHandler />
       {!isLanding && <SetupBanner />}
       <Navbar locale={locale} />
       <main className="store-shell min-h-screen">{children}</main>

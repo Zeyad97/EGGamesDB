@@ -87,7 +87,7 @@ export interface GameReview {
   game_id: string;
   user_id: string;
   rating: number;
-  content: string;
+  content?: string | null;
   is_recommended: boolean;
   helpful_count: number;
   created_at: string;
@@ -103,7 +103,11 @@ export interface Report {
   details: string | null;
   status: "open" | "resolved" | "dismissed";
   resolved_by: string | null;
+  resolved_at?: string | null;
+  resolution_note?: string | null;
   created_at: string;
+  profiles?: Pick<Profile, "username" | "display_name">;
+  games?: Pick<Game, "slug" | "title" | "title_ar"> | null;
 }
 
 export interface Notification {

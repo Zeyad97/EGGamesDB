@@ -10,6 +10,7 @@ const sectionKeys = [
   "collect",
   "use",
   "storage",
+  "network",
   "third_party",
   "cookies",
   "rights",

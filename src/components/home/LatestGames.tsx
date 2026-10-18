@@ -31,7 +31,7 @@ export function LatestGames({ games, locale }: LatestGamesProps) {
             </h2>
             <Link
               href="/games?sort=release_date"
-              className="text-xs text-eg-blue transition-colors hover:text-white"
+              className="inline-flex min-h-10 items-center text-xs text-eg-blue transition-colors hover:text-white sm:min-h-0"
             >
               {t("view_all")}
             </Link>
@@ -55,7 +55,7 @@ export function LatestGames({ games, locale }: LatestGamesProps) {
               <li key={genre}>
                 <Link
                   href={`/games?genre=${encodeURIComponent(genre)}`}
-                  className="block border-s border-eg-border ps-2 text-xs text-eg-text-sub transition-colors hover:border-eg-blue hover:text-white"
+                  className="inline-flex min-h-10 items-center border-s border-eg-border ps-2 text-xs text-eg-text-sub transition-colors hover:border-eg-blue hover:text-white sm:min-h-0"
                 >
                   {genreLabel(genre)}
                 </Link>

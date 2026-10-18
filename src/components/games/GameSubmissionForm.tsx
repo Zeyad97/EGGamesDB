@@ -125,7 +125,7 @@ export function GameSubmissionForm({ locale, initialData, gameId }: GameSubmissi
   return (
     <div dir={locale === "ar" ? "rtl" : "ltr"}>
       <div className="mb-8"><h1 className="text-3xl font-black text-eg-heading mb-2">{t("title")}</h1><p className="text-eg-text-sub">{t("intro")}</p></div>
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="border border-eg-border bg-eg-card rounded-2xl p-5 mb-8">
+      <motion.div initial={false} animate={{ opacity: 1, y: 0 }} className="border border-eg-border bg-eg-card rounded-2xl p-5 mb-8">
         <div className="flex items-center gap-2 mb-3"><Sparkles size={16} className="text-eg-gold" /><h2 className="font-semibold text-eg-heading">{t("steam_import")}</h2></div>
         <div className="flex gap-2"><Input value={steamInput} onChange={(e) => setSteamInput(e.target.value)} placeholder={t("steam_id_placeholder")} className="flex-1" onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), void handleSteamFetch())} /><Button type="button" onClick={handleSteamFetch} loading={fetchingSteam} className="flex-shrink-0">{t("fetch_steam")}</Button></div>
         <p className="text-xs text-eg-muted mt-2">{t("steam_id_label")}</p>

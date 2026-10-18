@@ -65,7 +65,7 @@ export function DeveloperDashboardClient({ profile, games, isDeveloper, locale }
   };
   const roleKey = profile.role === "super_admin" ? "roles.super_admin" : profile.role === "admin" ? "roles.admin" : profile.role === "contributor" ? "roles.contributor" : "roles.user";
   const statusKey = profile.developer_status === "approved" ? "account_status.approved" : profile.developer_status === "pending" ? "account_status.pending" : profile.developer_status === "rejected" ? "account_status.rejected" : "account_status.none";
-  const entryMotion = prefersReducedMotion ? { initial: false } : { initial: { opacity: 0, y: 8 }, animate: { opacity: 1, y: 0 } };
+  const entryMotion = { initial: false, animate: { opacity: 1, y: 0 } };
 
   return (
     <div className="min-h-screen">

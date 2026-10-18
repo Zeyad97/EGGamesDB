@@ -20,6 +20,7 @@ export default function LoginPage() {
     message && tv.has(message) ? tv(message as never) : message;
   const searchParams = useSearchParams();
   const confirmFailed = searchParams.get("error") === "confirm_failed";
+  const emailConfirmed = searchParams.get("confirmed") === "1";
   const router = useRouter();
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
@@ -53,6 +54,11 @@ export default function LoginPage() {
         {confirmFailed && (
           <p role="alert" className="mt-3 border border-red-400/40 bg-red-400/10 p-3 text-xs leading-5 text-red-200">
             {t("confirm_failed")}
+          </p>
+        )}
+        {emailConfirmed && (
+          <p role="status" className="mt-3 border border-eg-blue/40 bg-eg-blue/10 p-3 text-xs leading-5 text-eg-text-sub">
+            {t("email_confirmed_login")}
           </p>
         )}
 

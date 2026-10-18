@@ -26,7 +26,7 @@ export interface WishlistItem {
 export interface PlayerReview {
   id: string;
   rating: number;
-  content: string | null;
+  content?: string | null;
   is_recommended: boolean;
   created_at: string;
   game: Pick<Game, "id" | "slug" | "title" | "title_ar">;
@@ -149,7 +149,7 @@ export function PlayerProfileClient({
           </div>
           <div className="mt-5 grid grid-cols-2 border-t border-eg-border pt-4 sm:max-w-md">
             <div>
-              <p className="text-xl font-bold text-eg-heading">{wishlistAvailable ? items.length : "—"}</p>
+              <p className="text-xl font-bold text-eg-heading">{wishlistAvailable ? items.length : "-"}</p>
               <p className="text-[11px] text-eg-muted">{ta("metrics.wishlist")}</p>
             </div>
             <div className="border-s border-eg-border ps-3">
@@ -257,9 +257,6 @@ export function PlayerProfileClient({
                         {ta("rating", { rating: review.rating })}
                       </span>
                     </div>
-                    {review.content && (
-                      <p className="mt-2 text-sm leading-6 text-eg-text-sub">{review.content}</p>
-                    )}
                     <p className="mt-2 text-[11px] text-eg-muted">
                       {ta("reviewed_on", { date: formatDate(review.created_at, locale) })}
                     </p>
