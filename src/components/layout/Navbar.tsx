@@ -8,6 +8,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
   ChevronDown,
   Globe2,
+  Heart,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -20,6 +21,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Wordmark } from "@/components/layout/Brand";
 import { StoreSearch } from "@/components/layout/StoreSearch";
 import { createClient } from "@/lib/supabase/client";
+import { resolveAccountType } from "@/lib/account";
 import { useAuthStore } from "@/store/auth";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +33,7 @@ import { cn } from "@/lib/utils";
 export function Navbar({ locale }: { locale: string }) {
   const t = useTranslations("nav");
   const tc = useTranslations("common");
+  const tw = useTranslations("wishlist");
   const pathname = usePathname();
   const router = useRouter();
   const supabase = createClient();
@@ -85,9 +88,13 @@ export function Navbar({ locale }: { locale: string }) {
     return path === "/" ? pathname === "/" : pathname.startsWith(path);
   };
 
+  // Players get a wishlist-centred menu; studios keep the role-gated developer menu.
+  const isPlayer = !!profile && resolveAccountType(profile) === "player";
   const accountLinks = [
-    { href: "/profile", label: t("profile"), icon: User },
-    ...(isContributor
+    isPlayer
+      ? { href: "/profile", label: tw("nav_label"), icon: Heart }
+      : { href: "/profile", label: t("profile"), icon: User },
+    ...(!isPlayer && isContributor
       ? [
           { href: "/dashboard", label: t("dashboard"), icon: LayoutDashboard },
           { href: "/submit", label: t("submit"), icon: PlusCircle },

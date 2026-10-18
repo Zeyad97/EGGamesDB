@@ -1,6 +1,7 @@
 export type UserRole = "user" | "contributor" | "admin" | "super_admin";
 export type GameStatus = "pending" | "approved" | "rejected" | "draft";
 export type Locale = "en" | "ar";
+export type AccountType = "player" | "studio";
 
 export interface Profile {
   id: string;
@@ -9,6 +10,8 @@ export interface Profile {
   avatar_url: string | null;
   bio: string | null;
   role: UserRole;
+  /** Added by migration 009. Absent until that migration is applied. */
+  account_type?: AccountType;
   developer_status: "none" | "pending" | "approved" | "rejected";
   website: string | null;
   twitter: string | null;

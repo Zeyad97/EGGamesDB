@@ -80,7 +80,10 @@ export async function PATCH(req: NextRequest, ctx: { params: Promise<{ id: strin
     developer_name: data.developer_name,
     publisher: data.publisher || null,
     is_free: data.is_free,
-    price_usd: data.price_usd || null,
+    price_usd: data.price_usd ?? null,
+    header_image: data.header_image ?? null,
+    capsule_image: data.capsule_image ?? null,
+    screenshots: data.screenshots ?? [],
     status,
   };
   // Clear the moderator's reason when a rejected game is resubmitted; the

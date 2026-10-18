@@ -27,6 +27,7 @@ import { DemoNotice } from "@/components/games/DemoNotice";
 import { GamePrice, GameRating } from "@/components/games/GamePrice";
 import { GameScreenshots } from "@/components/games/GameScreenshots";
 import { GameVideos } from "@/components/games/GameVideos";
+import { WishlistButton } from "@/components/games/WishlistButton";
 import { SystemRequirements } from "@/components/games/SystemRequirements";
 import { createClient } from "@/lib/supabase/client";
 import { isDemoGame } from "@/lib/demo-games";
@@ -185,6 +186,8 @@ export function GameDetailClient({ game, reviews, relatedGames, locale }: GameDe
               </Button>
             </a>
           )}
+
+          {!demo && <WishlistButton gameId={game.id} />}
 
           <div className="ms-auto flex items-center gap-2">
             <Button type="button" variant="secondary" size="sm" onClick={copyLink} className="gap-1.5">

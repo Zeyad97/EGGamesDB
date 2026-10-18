@@ -13,6 +13,8 @@ export const registerSchema = z.object({
     .max(30, "Max 30 characters")
     .regex(/^[a-zA-Z0-9_-]+$/, "Only letters, numbers, _ and -"),
   display_name: z.string().min(1).max(60).optional(),
+  // Stores the message key; the register form translates it.
+  account_type: z.enum(["studio", "player"], { error: "account_type_required" }),
 });
 
 export const loginSchema = z.object({
