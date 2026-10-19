@@ -118,7 +118,7 @@ export function AboutExperience({ locale, contributors, gameImages, stats }: Abo
 
         <Reveal className="grid gap-8 border-t border-eg-border py-12 sm:grid-cols-[.65fr_1.35fr] sm:py-16">
           <div><p className="text-[10px] font-bold uppercase tracking-[.24em] text-eg-gold">05 <span className="mx-2 text-eg-red">/</span>{t("creator_kicker")}</p><h2 className="mt-3 text-2xl font-semibold text-eg-heading">{t("creator_title")}</h2></div>
-          <div><p className="max-w-3xl text-base leading-8 text-eg-text-sub">{t.rich("creator_body", { link: (chunks) => <a href="https://linktr.ee/zyad" target="_blank" rel="noopener noreferrer" className="font-semibold text-eg-gold underline decoration-eg-gold/40 underline-offset-4 hover:text-eg-accent-hover">{chunks}</a> })}</p><p className="mt-5 text-xs leading-6 text-eg-muted">{t.rich("license", { github: (chunks) => <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" className="text-eg-gold hover:text-eg-accent-hover">{chunks}</a> })}</p></div>
+          <div><p className="max-w-3xl text-base leading-8 text-eg-text-sub">{t.rich("creator_body", { link: (chunks) => <a href="https://zyaddev.com" target="_blank" rel="noopener noreferrer" className="font-semibold text-eg-gold underline decoration-eg-gold/40 underline-offset-4 hover:text-eg-accent-hover">{chunks}</a> })}</p><p className="mt-5 text-xs leading-6 text-eg-muted">{t.rich("license", { github: (chunks) => <a href={REPOSITORY_URL} target="_blank" rel="noopener noreferrer" className="text-eg-gold hover:text-eg-accent-hover">{chunks}</a> })}</p></div>
         </Reveal>
       </div>
 
